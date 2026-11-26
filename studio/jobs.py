@@ -440,6 +440,95 @@ def _tags(v) -> list:
     return out[:30]
 
 
+# What the clip editor may change in a look. Everything else (the cam box, the part of the video to show) is set
+# when the clip is made and is not offered in the editor.
+CAP_KEYS = ("show", "anim", "font", "color", "hi", "key", "outline", "shadow", "size", "per", "upper", "pop", "y", "bg", "bgc")
+HOOK_KEYS = ("show", "y", "font", "color", "bg", "bgc", "outline", "size", "upper")
+
+
+def clip_look(clip) -> dict:
+    """The look a clip is drawn with, tidied: the copy its template made when it was made, else the old style."""
+    raw = clip.get("look")
+    if not isinstance(raw, dict):
+        raw = templates.legacy(clip.get("style") or "bounce", clip.get("layout") or "blur")
+    return templates.clean_look(raw)
+
+
+def _kept_look(base: dict, part) -> dict:
+    """The editor's caption and heading changes, laid over the look the clip has now. Anything unknown is dropped,
+    and clean_look puts every value back in range."""
+    part = part if isinstance(part, dict) else {}
+    out = dict(base)
+    for name, keys in (("cap", CAP_KEYS), ("hook", HOOK_KEYS)):
+        got = part.get(name)
+        if isinstance(got, dict):
+            out[name] = {**base[name], **{k: got[k] for k in keys if k in got}}
+    if part.get("layout") in templates.LAYOUTS:
+        out["layout"] = part["layout"]
+    return out
+
+
+def _caption_words(job, clip, pad: float = 1.0) -> list:
+    """The words this clip's captions are drawn from, in seconds on the whole video (what words.json holds).
+    `pad` is how far past the clip's ends to look as well: the editor can pull the ends outwards."""
+    span = [round(clip["start"], 2), round(clip["end"], 2), "en2"]
+    if clip.get("fixed_for") == span and clip.get("fixed_words"):
+        return clip["fixed_words"]
+    heard = clip.get("heard")
+    if heard and (heard.get("a") or 0) - 0.5 <= clip["start"] and clip["end"] <= (heard.get("b") or 0) + 0.5:
+        return [w for w in heard.get("words") or [] if clip["start"] - 0.3 <= w["s"] < clip["end"]]
+    try:
+        words = json.loads((Path(job["dir"]) / "words.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    return [w for w in words if clip["start"] - pad <= w["s"] <= clip["end"] + pad]
+
+
+def clip_source_file(jid, cid) -> Path:
+    """The file the clip's picture is cut from: its own saved stretch of a stream, else the whole video."""
+    job = _jobs[jid]
+    clip = next(c for c in job["clips"] if c["id"] == cid)
+    if clip.get("src"):
+        piece = Path(clip["src"])
+        if piece.is_file():
+            return piece
+        raise ValueError("The part of the video this clip was cut from is no longer on this server, so it can't be "
+                         "edited. The clip itself is safe: download it, or add the video again for new clips.")
+    if job.get("source_path") and Path(job["source_path"]).is_file():
+        return Path(job["source_path"])
+    files = _source_files(job)
+    if files:
+        return files[0]
+    raise ValueError("The video this clip was made from is no longer on this server, so it can't be edited. "
+                     "Add the video again to make new clips from it.")
+
+
+def editor_state(jid, cid) -> dict:
+    """Everything the clip editor needs: the clip, its look, the words under it, and where its picture comes from.
+    Times are seconds on the whole video, as the rest of the app uses them; `words` are on the clip (0 is its start),
+    and video.start is where the clip begins inside the file the browser plays."""
+    job = _jobs[jid]
+    clip = next(c for c in job["clips"] if c["id"] == cid)
+    src = clip_source_file(jid, cid)
+    off = round(float(clip.get("src_offset") or 0.0), 2) if clip.get("src") else 0.0
+    length = round(float(clip.get("src_end") or job.get("duration") or clip["end"]) - off, 2)
+    words = [{"w": str(w.get("w") or ""), "s": round(w["s"] - clip["start"], 2), "e": round(w["e"] - clip["start"], 2)}
+             for w in _caption_words(job, clip, pad=10) if str(w.get("w") or "").strip()]
+    fields = ("id", "start", "end", "hook", "title", "description", "hashtags", "captions", "score", "version",
+              "status", "file", "cover", "style", "layout", "template", "soft", "error", "draft")
+    return {
+        "job": jid,
+        "clip": {k: clip.get(k) for k in fields},
+        "look": clip_look(clip),
+        "words": words,
+        "video": {"url": f"/api/jobs/{jid}/clips/{cid}/source", "width": int(job.get("width") or 0),
+                  "height": int(job.get("height") or 0), "duration": length, "start": round(clip["start"] - off, 2)},
+        "window": {"start": round(clip["start"], 2), "end": round(clip["end"], 2),
+                   "min": round(off, 2), "max": round(off + length, 2)},
+        "limits": {"min_len": 3, "max_len": 180},
+    }
+
+
 def update_text(jid, cid, changes: dict):
     """The post text only (title, description, hashtags): saved straight away, the video is not made again."""
     job = _jobs[jid]
@@ -463,6 +552,12 @@ def update_text(jid, cid, changes: dict):
                         keep[k] = v
                 except (TypeError, ValueError):
                     pass
+        if "captions" in d:
+            keep["captions"] = bool(d["captions"])
+        if isinstance(d.get("look"), dict):        # the editor's caption and heading choices, kept as a draft
+            part = d["look"]
+            keep["look"] = {name: {k: v for k, v in part[name].items() if k in keys}
+                            for name, keys in (("cap", CAP_KEYS), ("hook", HOOK_KEYS)) if isinstance(part.get(name), dict)}
         if keep:
             clip["draft"] = keep
         else:
@@ -552,6 +647,9 @@ def request_render(jid, cid, changes: dict):
     elif "style" in changes or "layout" in changes:  # the old caption style and layout choices
         new.pop("look", None)
         new["template"] = ""
+    if isinstance(changes.get("look"), dict):        # the clip editor: its own caption and heading choices, laid
+        new["look"] = templates.clean_look(_kept_look(clip_look(new), changes["look"]))   # over its template if one came too
+        new["layout"] = new["look"]["layout"]
     if "hashtags" in changes:
         new["hashtags"] = _tags(changes["hashtags"])
     if new.get("style") not in render.STYLES:

@@ -7,8 +7,11 @@ for k in ("PEAKCUT_MAX_LIVE_PER_USER", "PEAKCUT_MAX_JOBS_PER_USER", "PEAKCUT_MAX
     os.environ.pop(k, None)
 os.environ.update(DATABASE_URL="", PEAKCUT_MAX_LIVE="20")
 sys.path.insert(0, ".")
-from studio import auth, config, creators, ctx, db, live, load
+from studio import auth, config, creators, ctx, db, live, load, transcribe
 db.init()
+# This test is about limits, not about recording: an empty data folder has no speech model, so recording
+# would be refused for that reason before a limit is ever reached.
+transcribe.model_ready = lambda lang=None: True
 fails = []
 def check(n, got, want=True):
     ok = want(got) if callable(want) else got == want

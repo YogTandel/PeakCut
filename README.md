@@ -11,6 +11,9 @@ creator's live stream and clip the highlights while the stream is still running.
 
 - **Clips from any video.** Transcribes the audio, asks an AI which moments would hold a stranger's attention, and
   renders each one with captions in one of three styles.
+- **Edit a finished clip.** Open any clip in the editor: the source plays with the heading and captions drawn live,
+  a timeline trims it (snapping to words), and the caption style, font, size, colours and place can be changed. The
+  changes wait as a draft and "Update video" makes the clip again with them.
 - **Live clipping.** Records a stream into a rolling buffer and clips as it happens, using loudness, chat activity
   and the transcript.
 - **Workspaces per creator.** Channels, clip settings, posting rules and an activity log for each creator you clip.

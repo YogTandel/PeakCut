@@ -1279,6 +1279,28 @@ def _clip_or_404(jid: str, cid: str):
     return job, clip
 
 
+@app.get("/api/jobs/{jid}/clips/{cid}/editor")
+def clip_editor(jid: str, cid: str):
+    """What the clip editor draws and changes: the clip, its look, the words under it, and where its picture is."""
+    _clip_or_404(jid, cid)
+    try:
+        return jobs.editor_state(jid, cid)
+    except ValueError as e:
+        raise HTTPException(409, str(e))
+
+
+@app.get("/api/jobs/{jid}/clips/{cid}/source")
+def clip_source(jid: str, cid: str):
+    """The video the clip is cut from, so the editor can show it. Ranges are honoured, so seeking is cheap."""
+    _clip_or_404(jid, cid)
+    try:
+        f = jobs.clip_source_file(jid, cid)
+    except ValueError as e:
+        raise HTTPException(404, str(e))
+    return FileResponse(f, media_type="video/mp4", headers={"Cache-Control": "private, max-age=300"})
+
+
+
 @app.put("/api/jobs/{jid}/clips/{cid}/text")
 def clip_text(jid: str, cid: str, body: dict = Body(...)):
     """Save a clip's title, description and hashtags. The video is not made again."""

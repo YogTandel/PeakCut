@@ -1751,6 +1751,72 @@ a.cw-r:hover{background:#EDE3DB}a.cw-r:hover>svg{color:var(--text)}
 .ce3 .ce-go{flex:none;height:44px;min-height:44px;font-size:14px;margin-top:4px}
 .ce3 .ce2-when{flex:none}
 
+/* ---- the video editor: the clipper's studio, in PeakCut's colours. Left: the clip as it will look, drawn in the
+   browser from the source video. Right: the look. Below: the clip on a timeline you can trim. */
+#eddialog{width:min(1220px,calc(100vw - 24px));max-width:calc(100vw - 24px);padding:0;overflow:hidden}
+.ed3{display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;height:min(88vh,940px);background:var(--bg)}
+.ed3-head{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line)}
+.ed3-title{display:flex;flex-direction:column;min-width:0;flex:1}
+.ed3-title b{font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ed3-title span{font-size:12px;color:var(--faint)}
+.ed3-acts{display:flex;align-items:center;gap:8px;flex:none}
+.ed3-chip{font-size:11.5px;font-weight:700;color:var(--brand-deep);background:var(--brand-soft);border-radius:999px;padding:3px 10px;white-space:nowrap}
+.ed3-body{display:grid;grid-template-columns:minmax(0,1fr) 340px;min-height:0;background:var(--muted)}
+.ed3-stage{display:flex;flex-direction:column;min-height:0;padding:12px;gap:8px;overflow:hidden}
+.ed3-frame{flex:1;min-height:0;position:relative}
+.ed3-frame video{position:absolute;left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none}
+#edcanvas{position:absolute;inset:0;margin:auto;width:auto;height:auto;max-width:100%;max-height:100%;border-radius:12px;background:#0B0806;display:block}
+.ed3-wait{position:absolute;font-size:12.5px;color:var(--faint);background:rgba(255,255,255,.9);border-radius:8px;padding:5px 10px}
+.ed3-bar{display:flex;align-items:center;gap:8px;flex:none;padding:0 2px}
+.ed3-time{font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums;white-space:nowrap;min-width:118px}
+.ed3-seek{flex:1;accent-color:var(--brand);min-width:0}
+.ed3-side{background:#fff;border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.ed3-tabs{margin:10px 12px 0;background:var(--muted)}
+.ed3-tabs button{flex-direction:row;padding:7px 4px;font-size:12.5px}
+.ed3-panes{overflow:auto;padding:12px;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin}
+.ed3-grp{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:9px}
+.ed3-grp h4{margin:0;font-size:11px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;display:flex;justify-content:space-between;align-items:center}
+.ed3-grp h4 small{font-size:11px;font-weight:600;color:var(--dim);text-transform:none;letter-spacing:0}
+.ed3-row{display:flex;align-items:center;gap:8px}
+.ed3-row>span{width:78px;flex:none;font-size:12px;color:var(--dim);font-weight:600}
+.ed3-row>input[type=range]{flex:1;min-width:0;accent-color:var(--brand)}
+.ed3-row>input[type=number]{width:62px;flex:none}
+.ed3-grp select,.ed3-grp input[type=text],.ed3-grp input[type=number],.ed3-grp textarea{border:1px solid var(--line-2);border-radius:9px;padding:7px 9px;font:inherit;font-size:13px;background:#fff;color:var(--text);width:100%;min-width:0}
+.ed3-grp textarea{resize:vertical;min-height:52px}
+.ed3-grp select:focus,.ed3-grp input:focus,.ed3-grp textarea:focus{border-color:var(--brand)}
+.ed3-grp input[type=color]{width:38px;height:30px;padding:2px;border:1px solid var(--line-2);border-radius:8px;background:#fff;flex:none;cursor:pointer}
+.ed3-sw{display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:600;color:var(--text);cursor:pointer}
+.ed3-sw input{appearance:none;width:36px;height:21px;border-radius:999px;background:#DCD2D0;position:relative;cursor:pointer;flex:none;margin:0;transition:background-color .15s ease}
+.ed3-sw input::after{content:"";position:absolute;top:3px;left:3px;width:15px;height:15px;border-radius:50%;background:#fff;transition:transform .15s}
+.ed3-sw input:checked{background:var(--brand)}.ed3-sw input:checked::after{transform:translateX(15px)}
+.ed3-hint{font-size:11.5px;color:var(--faint);line-height:1.45}
+.ed3-tl{border-top:1px solid var(--line);background:#fff;padding:0 14px 10px}
+.ed3-ruler{height:19px;position:relative;border-bottom:1px solid var(--line)}
+.ed3-ruler span{position:absolute;top:2px;font-size:10.5px;color:var(--faint);transform:translateX(-50%);font-variant-numeric:tabular-nums}
+.ed3-track{position:relative;height:62px;margin-top:8px;border:1px solid var(--line);border-radius:10px;background:var(--muted);overflow:hidden;cursor:crosshair;touch-action:none}
+.ed3-words{position:absolute;inset:0;pointer-events:none}
+.ed3-w{position:absolute;bottom:9px;height:26px;background:#E4DAD4;border-radius:3px;min-width:2px}
+.ed3-w.on{background:var(--brand-line)}
+.ed3-sel{position:absolute;top:0;bottom:0;border-left:2px solid var(--brand);border-right:2px solid var(--brand);background:rgba(255,139,51,.10)}
+.ed3-sel i.h{position:absolute;top:0;bottom:0;width:13px;background:var(--brand);cursor:ew-resize;border-radius:3px;touch-action:none}
+.ed3-sel i.h.l{left:-7px}.ed3-sel i.h.r{right:-7px}
+.ed3-sel i.h::after{content:"";position:absolute;left:5px;top:50%;width:2px;height:15px;margin-top:-7.5px;background:rgba(255,255,255,.75);border-radius:2px}
+.ed3-ph{position:absolute;top:0;bottom:0;width:2px;background:var(--text);pointer-events:none}
+.ed3-ph::before{content:"";position:absolute;top:-1px;left:-4px;border:5px solid transparent;border-top-color:var(--text)}
+.ed3-foot{display:flex;align-items:center;gap:8px;padding:9px 14px;border-top:1px solid var(--line);background:#fff}
+.ed3-note{font-size:12px;color:var(--dim);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ed3-load{padding:60px 24px;text-align:center;font-size:13.5px;color:var(--dim)}
+.btn.icon.ed-edit svg{width:16px;height:16px}
+@media (max-width:1050px){
+  .ed3-body{grid-template-columns:minmax(0,1fr) 300px}
+}
+@media (max-width:760px){
+  .ed3-body{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) minmax(0,45%)}
+  .ed3-side{max-height:none;border-left:0;border-top:1px solid var(--line)}
+  #eddialog{width:calc(100vw - 12px);max-width:calc(100vw - 12px)}
+}
+
+
 .cmp-need{font-size:11.5px;font-weight:700;color:var(--brand-deep);background:var(--brand-soft);border-radius:999px;padding:3px 10px;white-space:nowrap}
 .cmp-setup{margin:14px 16px 0;padding:14px;border-radius:12px;background:var(--brand-soft);display:flex;flex-direction:column;gap:10px}
 .cmp-sh{display:flex;flex-direction:column;gap:2px}.cmp-sh b{font-size:14px;color:var(--brand-ink)}.cmp-sh span{font-size:12.5px;color:var(--dim)}
@@ -2256,6 +2322,7 @@ textarea.cpg-in{height:auto;padding:8px 12px;resize:vertical}.cpg-in:focus{borde
   </main>
 </div>
 <dialog id="clipdlg"></dialog>
+<dialog id="eddialog" aria-label="Clip editor"></dialog>
 <dialog id="formdlg"></dialog>
 <dialog id="schdlg" aria-label="Scheduled post"></dialog>
 <input type="file" id="file" accept="video/*" multiple hidden>
@@ -4042,6 +4109,7 @@ function clipHtml(j, c) {
       ${c.status === "done" ? clipWhere(c) : ""}
       <div class="clip-foot">
         ${busyClip ? "" : `<label class="selck" title="Select this clip"><input type="checkbox" data-sel="${key}" ${sel().has(key) ? "checked" : ""} aria-label="Select this clip"></label>`}
+        ${c.status === "done" ? `<button class="btn sm icon ghost" data-act="openedit" ${a} title="Edit this clip" aria-label="Edit this clip">${ic("sliders")}</button>` : ""}
         ${c.status === "done" ? `<a class="btn sm icon ghost" href="${m}${esc(c.file)}?download=1" title="Download" aria-label="Download">${ic("down")}</a>` : ""}
         <button class="btn sm icon ghost" data-act="copy" ${a} title="Copy post text" aria-label="Copy post text">${ic("copy")}</button>
         ${busyClip ? "" : `<button class="btn sm icon ghost" data-act="delclip" ${a} title="Delete this clip" aria-label="Delete this clip">${ic("trash")}</button>`}
@@ -6042,7 +6110,7 @@ function drawClipDlg(full) {
           <div id="cdlater" hidden><div id="cdcal"></div><div id="schtp"></div></div>
           <button class="btn primary ce-go" data-act="cdgo">${ic("send")}Post now</button>`)
         : `<div class="ce-empty">${ic("plug")}<span>Connect an account to post.</span><button class="btn sm" data-act="go" data-v="settings" data-t="apps">Connect</button></div>`}
-        <div class="ce-foot">${c.status === "done" ? `<a class="btn sm ghost" href="${m}${esc(c.file)}?download=1">${ic("down")}Download</a>` : ""}<span class="grow"></span>
+        <div class="ce-foot">${c.status === "done" ? `<button class="btn sm" data-act="openedit" data-j="${j.id}" data-c="${esc(c.id)}">${ic("sliders")}Edit video</button><a class="btn sm ghost" href="${m}${esc(c.file)}?download=1">${ic("down")}Download</a>` : ""}<span class="grow"></span>
           <button class="btn sm ghost" data-act="delclip" data-j="${j.id}" data-c="${esc(c.id)}">${ic("trash")}Delete</button></div>
       </div></div>`;
     cdCal(); schTp(); cdLabel(); vpWire();
@@ -6147,7 +6215,649 @@ function postText() {   // the post text as it is in the clip editor right now
 $("#clipdlg").addEventListener("close", () => { $("#clipdlg").innerHTML = ""; D.jid = null; });
 $("#clipdlg").addEventListener("click", e => { if (e.target === e.currentTarget) e.currentTarget.close(); });
 
-/* ============================================================ render + polling */
+/* ============================================================ the video editor
+   One clip in a studio. The picture the clip is cut from plays on the left with the heading and captions drawn over
+   it the way the server will draw them, the timeline under it trims the clip, and the right side holds the look.
+   Nothing is made until "Update video": the changes wait as a draft, then the clip is made again from them. */
+const ED = {jid: null, cid: null, data: null, draft: {}, undo: [], redo: [], play: false, raf: 0, poll: 0,
+            saveT: 0, typeT: 0, typing: false, saving: false, view: null, groups: "", words: [], font: ""};
+const ED_SW = 720, ED_SH = 1280, ED_K = ED_SH / 1920;        // the frame is drawn at 9:16; sizes are the server's (1920 tall)
+const edc = v => "#" + String(v ?? "000000").replace(/^#/, "").slice(-6).padStart(6, "0");
+const edtc = t => { t = Math.max(0, Number(t) || 0); const m = Math.floor(t / 60); return `${m}:${(t - m * 60).toFixed(1).padStart(4, "0")}`; };
+const edVal = k => k in ED.draft ? ED.draft[k] : ED.data.clip[k];
+const edCapsOn = () => "captions" in ED.draft ? !!ED.draft.captions : ED.data.clip.captions !== false;
+function edLook() {
+  const b = ED.data.look, p = ED.draft.look || {};
+  return {...b, cap: {...b.cap, ...(p.cap || {})}, hook: {...b.hook, ...(p.hook || {})}, layout: p.layout || b.layout};
+}
+function edSet(part, key, v) {
+  if (part === "clip") { ED.draft[key] = v; return; }
+  if (part === "layout") { edSet("look", "layout", v); return; }
+  if (part === "look") { ED.draft.look = {...(ED.draft.look || {}), [key]: v}; return; }
+  const look = {...(ED.draft.look || {})};
+  look[part] = {...(look[part] || {}), [key]: v};
+  ED.draft.look = look;
+}
+// Where the server puts the picture in the 1080x1920 frame, and where the heading and captions go (render.geometry).
+function edGeo(look) {
+  const sw = ED.data.video.width || 1920, sh = ED.data.video.height || 1080;
+  let layout = look.layout || "blur";
+  if (sh >= sw && layout !== "crop") layout = "crop";
+  const fills = layout === "crop" || layout === "left" || layout === "right" || layout === "gameplay";
+  let hh;                                                         // the picture's height in the 1920-tall frame
+  if (layout === "blur" || layout === "fit") hh = Math.min(1920, Math.round(1080 * sh / sw / 2) * 2);
+  else if (layout === "zoom") hh = 1000;
+  else hh = 1920;
+  const top = Math.floor((1920 - hh) / 2);
+  let hook, cap;
+  if (fills) { hook = 300; cap = 1380; }
+  else if (layout === "split") { hook = 230; cap = 960; }
+  else { hook = Math.max(230, top - 190); cap = Math.min(1640, top + hh + 180); }
+  if (look.cap.y != null && look.cap.y !== "") cap = Math.round(1920 * Number(look.cap.y) / 100);
+  if (look.hook.y != null && look.hook.y !== "") hook = Math.round(1920 * Number(look.hook.y) / 100);
+  return {layout, h: hh, top, hook, cap};
+}
+function edChanged() {
+  const c = ED.data.clip, l = edLook(), b = ED.data.look;
+  const body = {cap: l.cap, hook: l.hook, layout: l.layout}, was = {cap: b.cap, hook: b.hook, layout: b.layout};
+  return String(edVal("hook") ?? "") !== String(c.hook ?? "")
+    || Math.abs(Number(edVal("start")) - Number(c.start)) > 0.005
+    || Math.abs(Number(edVal("end")) - Number(c.end)) > 0.005
+    || edCapsOn() !== (c.captions !== false)
+    || JSON.stringify(body) !== JSON.stringify(was);
+}
+function edBody() {
+  const l = edLook();
+  const look = {layout: l.layout, cap: {}, hook: {}};
+  ED_CAP.forEach(k => { if (k in l.cap) look.cap[k] = l.cap[k]; });
+  ED_HOOK.forEach(k => { if (k in l.hook) look.hook[k] = l.hook[k]; });
+  return {start: Math.round(Number(edVal("start")) * 100) / 100, end: Math.round(Number(edVal("end")) * 100) / 100,
+          hook: String(edVal("hook") ?? "").slice(0, 60), captions: edCapsOn(), look};
+}
+const ED_CAP = ["show", "anim", "font", "color", "hi", "outline", "shadow", "size", "per", "upper", "pop", "y", "bg", "bgc"];
+const ED_HOOK = ["show", "y", "font", "color", "outline", "size", "upper", "bg", "bgc"];
+
+async function openEditor(jid, cid) {
+  const dlg = $("#eddialog");
+  ED.jid = jid; ED.cid = cid; ED.data = null; ED.draft = {}; ED.undo = []; ED.redo = []; ED.play = false; ED.saving = false;
+  clearTimeout(ED.poll); clearTimeout(ED.saveT); ED.view = null;
+  dlg.innerHTML = `<div class="ed3"><div class="ed3-load">Opening the editor…</div></div>`;
+  if (!dlg.open) dlg.showModal();
+  if (!Object.keys(S.tpl.fonts || {}).length) await loadTpls();
+  try { ED.data = await api(`/api/jobs/${jid}/clips/${cid}/editor`); }
+  catch (e) {
+    dlg.innerHTML = `<div class="ed3"><div class="ed3-load">${esc(e.message)}</div>
+      <div class="ed3-foot"><span class="grow"></span><button class="btn" data-act="edclose">Close</button></div></div>`;
+    return;
+  }
+  const saved = ED.data.clip.draft;
+  if (saved && typeof saved === "object") for (const k of ["hook", "start", "end", "captions", "look"]) if (k in saved) ED.draft[k] = saved[k];
+  edBuild();
+  edFont(edLook().cap.font);
+}
+function edTeardown() {
+  cancelAnimationFrame(ED.raf); clearTimeout(ED.poll); clearTimeout(ED.saveT);
+  try { ED.ro?.disconnect(); } catch {}
+  const v = $("#edvideo"); if (v) { try { v.pause(); v.removeAttribute("src"); v.load(); } catch {} }
+  const was = ED.jid; ED.data = null; ED.play = false;
+  $("#eddialog").innerHTML = "";
+  if (was) tick();
+}
+$("#eddialog").addEventListener("close", edTeardown);
+$("#eddialog").addEventListener("click", e => { if (e.target === e.currentTarget) e.currentTarget.close(); });
+
+function edBuild() {
+  const c = ED.data.clip, look = edLook();
+  const tpls = tplAll().map(t => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join("");
+  const fonts = Object.keys(S.tpl.fonts || {}).map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join("");
+  const anims = Object.entries(S.tpl.anims || {pop: "Pop"}).map(([k, n]) => `<option value="${esc(k)}">${esc(n)}</option>`).join("");
+  const lays = Object.entries(S.tpl.layouts || {blur: "Full + blur"}).map(([k, n]) => `<option value="${esc(k)}">${esc(n)}</option>`).join("");
+  const sw = (id, on, label) => `<label class="ed3-sw"><input type="checkbox" id="${id}"${on ? " checked" : ""}>${label}</label>`;
+  const numRow = (label, id, min, max, step, unit = "") => `<div class="ed3-row"><span>${label}</span>
+    <input type="range" id="${id}" min="${min}" max="${max}" step="${step}"><input type="number" id="${id}n" min="${min}" max="${max}" step="${step}" aria-label="${label}">${unit ? `<small class="ed3-hint">${unit}</small>` : ""}</div>`;
+  $("#eddialog").innerHTML = `<div class="ed3">
+    <header class="ed3-head">
+      <div class="ed3-title"><b>${esc(c.title || c.hook || "Untitled clip")}</b><span id="edmeta"></span></div>
+      <div class="ed3-acts"><span class="ed3-chip" id="eddirty" hidden>Not made yet</span>
+        <button class="btn icon ghost sm" data-act="edclose" aria-label="Close the editor">${ic("x")}</button></div>
+    </header>
+    <div class="ed3-body">
+      <div class="ed3-stage">
+        <div class="ed3-frame">
+          <canvas id="edcanvas" width="${ED_SW}" height="${ED_SH}" aria-label="The clip as it will look"></canvas>
+          <video id="edvideo" src="${esc(ED.data.video.url)}" preload="auto" playsinline crossorigin="anonymous"></video>
+          <span class="ed3-wait" id="edwait">Loading the video…</span>
+        </div>
+        <div class="ed3-bar">
+          <button class="btn icon ghost sm" data-act="edplay" id="edplay" aria-label="Play">${VP.play}</button>
+          <span class="ed3-time" id="edtime">0:00.0 / 0:00.0</span>
+          <input type="range" class="ed3-seek" id="edseek" min="0" max="1000" step="1" value="0" aria-label="Playhead">
+          <button class="btn icon ghost sm" data-act="edmute" id="edmute" aria-label="Sound on or off">${VP.vol}</button>
+        </div>
+      </div>
+      <aside class="ed3-side">
+        <div class="seg ed3-tabs" role="tablist">
+          <button role="tab" data-act="edtab" data-k="look" aria-pressed="true">Style</button>
+          <button role="tab" data-act="edtab" data-k="cap" aria-pressed="false">Captions</button>
+          <button role="tab" data-act="edtab" data-k="hook" aria-pressed="false">Heading</button>
+        </div>
+        <div class="ed3-panes">
+          <div data-pane="look">
+            <div class="ed3-grp"><h4>Style</h4>
+              <div class="ed3-row"><span>Template</span><select id="edtpl"><option value="">As it is now</option>${tpls}</select></div>
+              <div class="ed3-row"><span>Layout</span><select id="edlay">${lays}</select></div>
+              ${sw("edcaps", edCapsOn(), "Captions on the video")}
+            </div>
+            <div class="ed3-grp" style="margin-top:12px"><h4>Where they sit</h4>
+              ${numRow("Caption height", "edcapy", 0, 100, 1, "%")}
+              ${sw("edcapyauto", edLook().cap.y == null, "Automatic (under the picture)")}
+              ${numRow("Heading height", "edhooky", 0, 100, 1, "%")}
+              ${sw("edhookyauto", edLook().hook.y == null, "Automatic (above the picture)")}
+              <p class="ed3-hint">The picture, the heading and the captions are laid out the same way the server draws them. The two heights only matter once set.</p>
+            </div>
+          </div>
+          <div data-pane="cap" hidden>
+            <div class="ed3-grp"><h4>Captions</h4>
+              <div class="ed3-row"><span>Font</span><select id="edcapfont">${fonts}</select></div>
+              ${numRow("Size", "edcapsize", 60, 200, 1, "px at 1920")}
+              ${numRow("Words a line", "edcapper", 1, 5, 1)}
+              <div class="ed3-row"><span>Animation</span><select id="edcapanim">${anims}</select></div>
+              <div class="ed3-row"><span>Colour</span><input type="color" id="edcapcolor"><input type="color" id="edcaphigh" aria-label="Highlight colour"><span style="width:auto;font-weight:400">said word</span></div>
+              ${numRow("Outline", "edcapoutline", 0, 14, 1, "px")}
+              ${numRow("Pop", "edcappop", 100, 120, 1, "% bigger")}
+              ${sw("edcapupper", edLook().cap.upper, "CAPITALS")}
+              ${sw("edcapbg", edLook().cap.bg, "A box behind the words")}
+              <div class="ed3-row"><span>Box colour</span><input type="color" id="edcapbgc"></div>
+            </div>
+          </div>
+          <div data-pane="hook" hidden>
+            <div class="ed3-grp"><h4>Heading</h4>
+              <textarea id="edhook" maxlength="60" placeholder="The big text at the top" aria-label="The heading">${esc(edVal("hook") ?? "")}</textarea>
+              ${numRow("Size", "edhooksize", 60, 160, 1, "px at 1920")}
+              <div class="ed3-row"><span>Colour</span><input type="color" id="edhookcolor"></div>
+              ${numRow("Outline", "edhookoutline", 0, 14, 1, "px")}
+              ${sw("edhookupper", edLook().hook.upper, "CAPITALS")}
+              ${sw("edhookbg", edLook().hook.bg, "A box behind the heading")}
+              <div class="ed3-row"><span>Box colour</span><input type="color" id="edhookbgc"></div>
+              ${sw("edhookshow", edLook().hook.show, "Show the heading")}
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+    <div class="ed3-tl">
+      <div class="ed3-ruler" id="edruler"></div>
+      <div class="ed3-track" id="edtrack" aria-label="The clip on its video: drag the orange ends to trim">
+        <div class="ed3-words" id="edwords"></div>
+        <div class="ed3-sel" id="edsel"><i class="h l" data-h="l"></i><i class="h r" data-h="r"></i></div>
+        <div class="ed3-ph" id="edph"></div>
+      </div>
+    </div>
+    <footer class="ed3-foot">
+      <button class="btn sm ghost" data-act="edundo" id="edundo"><span class="flip">${ic("arrowr")}</span>Undo</button>
+      <button class="btn sm ghost" data-act="edredo" id="edredo">Redo${ic("arrowr")}</button>
+      <button class="btn sm ghost" data-act="edreset">Reset</button>
+      <span class="grow"></span>
+      <span class="ed3-note" id="ednote"></span>
+      <button class="btn primary" data-act="edsave" id="edsave">${ic("scissors")}Update video</button>
+    </footer>
+  </div>`;
+  edWire();
+  edSync();
+  edDraw();
+}
+function edWire() {
+  const v = $("#edvideo"), cv = $("#edcanvas");
+  v.addEventListener("loadedmetadata", () => { $("#edwait").hidden = true; edSeek(Number(edVal("start"))); edDraw(); });
+  v.addEventListener("error", () => { $("#edwait").hidden = false; $("#edwait").textContent = "This browser could not play the video."; });
+  v.addEventListener("play", () => { ED.play = true; edPaintTransport(); edLoop(); });
+  v.addEventListener("pause", () => { ED.play = false; edPaintTransport(); edDraw(); });
+  v.addEventListener("seeked", () => { edDraw(); edMark(); });
+  $("#edseek").addEventListener("input", e => {
+    const view = edViewRange(); edSeek(view.a + Number(e.target.value) / 1000 * (view.b - view.a));
+  });
+  edTrackWire();
+  ED.ro = new ResizeObserver(() => edTimeline()); ED.ro.observe($("#edtrack"));
+  edTimeline(); edPaintTransport(); edMark();
+}
+$("#eddialog").addEventListener("keydown", edKeys);
+function edPaintTransport() {
+  const b = $("#edplay"), v = $("#edvideo"), mu = $("#edmute");
+  if (b) { b.innerHTML = ED.play ? VP.pause : VP.play; b.setAttribute("aria-label", ED.play ? "Pause" : "Play"); }
+  if (mu) mu.innerHTML = v.muted ? VP.mute : VP.vol;
+}
+function edFont(name) {
+  if (!name || ED.font === name) return;
+  ED.font = name;
+  try { (document.fonts?.load(`900 40px "pcf ${name}"`) || Promise.resolve()).then(() => edDraw()).catch(() => {}); } catch {}
+}
+function edViewRange() {
+  if (ED.view) return ED.view;
+  const w = ED.data.window, a0 = Number(edVal("start")), b0 = Number(edVal("end"));
+  const pad = Math.max(8, b0 - a0);
+  let a = Math.max(w.min, a0 - pad), b = Math.min(w.max, b0 + pad);
+  if (b - a < 8) { a = Math.max(w.min, a - 4); b = Math.min(w.max, b + 4); }
+  if (b - a < 2) b = Math.min(w.max, a + 2);
+  return {a, b};
+}
+function edTimeline() {
+  if (!ED.data || !$("#edtrack")) return;
+  const track = $("#edtrack"), view = edViewRange(), span = Math.max(.01, view.b - view.a), width = track.clientWidth || 600;
+  const x = t => (t - view.a) / span * 100;
+  // the seconds along the top
+  const step = span > 300 ? 60 : span > 120 ? 30 : span > 60 ? 10 : span > 20 ? 5 : span > 8 ? 2 : 1;
+  const ticks = [];
+  for (let t = Math.ceil(view.a / step) * step; t <= view.b + 1e-6; t += step) {
+    ticks.push(`<span style="left:${x(t).toFixed(3)}%">${esc(edtc(t))}</span>`);
+  }
+  put($("#edruler"), ticks.join(""));
+  // every word, so it is clear where speech is
+  const words = ED.data.words.map(w => {
+    const a0 = ED.data.clip.start + w.s, a1 = ED.data.clip.start + w.e;
+    if (a1 < view.a || a0 > view.b) return "";
+    const l = Math.max(0, x(a0)), r = Math.min(100, x(a1));
+    return `<i class="ed3-w" style="left:${l.toFixed(3)}%;width:${Math.max(.12, r - l).toFixed(3)}%" title="${esc(w.w)}"></i>`;
+  }).join("");
+  put($("#edwords"), words);
+  const start = Number(edVal("start")), end = Number(edVal("end"));
+  const sel = $("#edsel");
+  sel.style.left = Math.max(0, x(start)) + "%";
+  sel.style.width = Math.max(0, x(end) - Math.max(0, x(start))) + "%";
+  edMark();
+}
+function edMark() {
+  const v = $("#edvideo"); if (!v) return;
+  const abs = v.currentTime + ED.data.video.start, view = edViewRange();
+  const pct = Math.max(0, Math.min(100, (abs - view.a) / (view.b - view.a) * 100));
+  const ph = $("#edph"); if (ph) ph.style.left = pct + "%";
+  const seek = $("#edseek"); if (seek && document.activeElement !== seek) seek.value = Math.round(pct * 10);
+  const t = $("#edtime"); if (t) {
+    const len = Number(edVal("end")) - Number(edVal("start"));
+    t.textContent = `${edtc(Math.max(0, abs - Number(edVal("start"))))} / ${edtc(len)}`;
+  }
+  put($("#edmeta"), `${fmt(Number(edVal("end")) - Number(edVal("start")))} · ${ED.data.video.width}×${ED.data.video.height}`);
+}
+function edSeek(abs) {
+  const v = $("#edvideo"); if (!v) return;
+  const w = ED.data.window, a = Math.max(w.min, Math.min(w.max, abs));
+  try { v.currentTime = Math.max(0, Math.min(v.duration || 1e9, a - ED.data.video.start)); } catch {}
+  edMark(); edDraw();
+}
+function edLoop() {
+  cancelAnimationFrame(ED.raf);
+  const step = () => {
+    const v = $("#edvideo");
+    if (!ED.data || !v || v.paused) return;
+    const abs = v.currentTime + ED.data.video.start;
+    if (abs >= Number(edVal("end"))) edSeek(Number(edVal("start")));
+    else { edMark(); edDraw(); }
+    ED.raf = requestAnimationFrame(step);
+  };
+  ED.raf = requestAnimationFrame(step);
+}
+function edCover(ctx, v, x, y, w, h, align = "center", sx = 0, sw = 1) {
+  const vw = v.videoWidth, vh = v.videoHeight;
+  if (!vw || !vh) return;
+  const srcW = vw * sw, srcX = vw * sx;
+  const s = Math.max(w / srcW, h / vh), dw = srcW * s, dh = vh * s;
+  const dx = align === "left" ? x : align === "right" ? x + w - dw : x + (w - dw) / 2;
+  ctx.drawImage(v, srcX, 0, srcW, vh, dx, y + (h - dh) / 2, dw, dh);
+}
+function edContain(ctx, v, x, y, w, h) {
+  const vw = v.videoWidth, vh = v.videoHeight; if (!vw || !vh) return;
+  const s = Math.min(w / vw, h / vh), dw = vw * s, dh = vh * s;
+  ctx.drawImage(v, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+}
+function edRound(ctx, x, y, w, h, r) {
+  r = Math.min(r, h / 2, w / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function edDraw() {
+  const cv = $("#edcanvas"); if (!ED.data || !cv) return;
+  const ctx = cv.getContext("2d"), v = $("#edvideo"), look = edLook(), g = edGeo(look), k = ED_K;
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  ctx.fillStyle = "#0B0806"; ctx.fillRect(0, 0, cv.width, cv.height);
+  if (v && v.readyState >= 2) {
+    const lay = g.layout;
+    if (lay === "blur" || lay === "zoom") {
+      ctx.save(); ctx.filter = "blur(14px) brightness(.5) saturate(1.2)";
+      edCover(ctx, v, 0, 0, cv.width, cv.height); ctx.restore();
+    } else if (lay !== "fit") {
+      edCover(ctx, v, 0, 0, cv.width, cv.height, lay === "left" ? "left" : lay === "right" ? "right" : "center");
+    }
+    if (lay === "blur" || lay === "zoom") edCover(ctx, v, 0, g.top * k, cv.width, g.h * k);
+    else if (lay === "fit") edContain(ctx, v, 0, g.top * k, cv.width, g.h * k);
+    else if (lay === "split") {                       // both sides of the picture, one above the other
+      edCover(ctx, v, 0, 0, cv.width, cv.height / 2, "center", 0, .5);
+      edCover(ctx, v, 0, cv.height / 2, cv.width, cv.height / 2, "center", .5, .5);
+    }
+  }
+  const abs = v && v.currentTime ? v.currentTime + ED.data.video.start : Number(edVal("start"));
+  if (look.hook.show) edHookDraw(ctx, look, g, k, abs);
+  if (edCapsOn() && look.cap.show) edCapDraw(ctx, look, g, k, abs);
+}
+function edHookDraw(ctx, look, g, k, abs) {
+  const hk = look.hook, text = String(edVal("hook") ?? "").trim();
+  if (!text) return;
+  const dur = Number(edVal("end")) - Number(edVal("start"));
+  const at = abs - Number(edVal("start"));
+  if (at < 0.12 || at > Math.min(4, Math.max(1.5, dur - .25))) return;
+  edFont(hk.font);
+  const size = Math.max(10, Math.round(Number(hk.size || 96) * (S.tpl.hk?.[hk.font] || 1) * k));
+  ctx.save();
+  ctx.font = `900 ${size}px "pcf ${hk.font}", "Poppins ExtraBold", sans-serif`;
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  const maxW = ctx.canvas.width * .86, pad = size * .28, lh = size * 1.16;
+  const words = (hk.upper ? text.toUpperCase() : text).split(/\s+/).filter(Boolean);
+  const lines = []; let line = "";
+  for (const w of words) {
+    const next = line ? line + " " + w : w;
+    if (line && ctx.measureText(next).width > maxW) { lines.push(line); line = w; } else line = next;
+  }
+  if (line) lines.push(line);
+  lines.slice(0, 3).forEach((ln, i) => {
+    const y = g.hook * k + lh * (i + .5), w = ctx.measureText(ln).width;
+    if (hk.bg) {
+      ctx.fillStyle = edc(hk.bgc);
+      edRound(ctx, ctx.canvas.width / 2 - w / 2 - pad, y - lh / 2, w + pad * 2, lh, size * .18); ctx.fill();
+    }
+    if (hk.outline) { ctx.lineWidth = Number(hk.outline) * k; ctx.strokeStyle = "#000"; ctx.strokeText(ln, ctx.canvas.width / 2, y); }
+    ctx.fillStyle = edc(hk.color); ctx.fillText(ln, ctx.canvas.width / 2, y);
+  });
+  ctx.restore();
+}
+function edGroups() {
+  const per = Math.max(1, Math.min(5, Number(edLook().cap.per) || 3)), key = per + ":" + ED.data.words.length;
+  if (ED.groups === key) return ED.words;
+  const out = []; let cur = [];
+  for (const w of ED.data.words) {
+    if (cur.length && (cur.length >= per || cur.reduce((n, x) => n + x.w.length, 0) + w.w.length > 16
+      || w.s - cur[cur.length - 1].e > .45 || /[.?!]$/.test(cur[cur.length - 1].w))) { out.push(cur); cur = []; }
+    cur.push(w);
+  }
+  if (cur.length) out.push(cur);
+  ED.groups = key; ED.words = out;
+  return out;
+}
+function edCapDraw(ctx, look, g, k, abs) {
+  const cap = look.cap, groups = edGroups();
+  const t0 = abs - ED.data.clip.start;                       // words are timed from the clip's original start
+  const grp = groups.find(gp => t0 >= gp[0].s - .05 && t0 <= gp[gp.length - 1].e + .45);
+  if (!grp) return;
+  edFont(cap.font);
+  const size = Math.max(10, Math.round(Number(cap.size || 132) * k)), pad = size * .22;
+  ctx.save();
+  ctx.font = `900 ${size}px "pcf ${cap.font}", "Poppins ExtraBold", sans-serif`;
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  const words = grp.map(w => cap.upper ? w.w.toUpperCase() : w.w);
+  const space = ctx.measureText(" ").width;
+  const widths = words.map(w => ctx.measureText(w).width);
+  const total = widths.reduce((a, b) => a + b, 0) + space * Math.max(0, words.length - 1);
+  const active = grp.reduce((n, w, i) => t0 >= w.s - .02 ? i : n, -1);
+  let x = ctx.canvas.width / 2 - total / 2;
+  const y = g.cap * k;
+  if (cap.bg) {
+    ctx.fillStyle = edc(cap.bgc);
+    edRound(ctx, x - pad, y - size * .72, total + pad * 2, size * 1.44, size * .16); ctx.fill();
+  }
+  const outline = Number(cap.outline || 0) * k;
+  words.forEach((word, i) => {
+    const w = widths[i], cx = x + w / 2;
+    const said = i <= active, isNow = i === active;
+    const pop = cap.anim === "pop" && isNow ? Math.min(1.2, Math.max(1, Number(cap.pop || 112) / 100)) : 1;
+    ctx.save();
+    ctx.translate(cx, y); ctx.scale(pop, pop); ctx.translate(-cx, -y);
+    if (cap.anim === "box" && isNow) {
+      ctx.fillStyle = edc(cap.hi);
+      edRound(ctx, x - pad * .6, y - size * .72, w + pad * 1.2, size * 1.44, size * .16); ctx.fill();
+    }
+    if (outline) { ctx.lineWidth = outline; ctx.strokeStyle = "#000"; ctx.strokeText(word, cx, y); }
+    ctx.fillStyle = edc(isNow || (cap.anim === "fill" && said) ? cap.hi : cap.color);
+    ctx.fillText(word, cx, y);
+    ctx.restore();
+    x += w + space;
+  });
+  ctx.restore();
+}
+// ---- the timeline: drag the middle to scrub, the orange ends to trim, click a word to jump to it
+function edTrackWire() {
+  const track = $("#edtrack"); if (!track) return;
+  let mode = null;
+  const at = e => {
+    const r = track.getBoundingClientRect(), view = edViewRange();
+    return view.a + Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * (view.b - view.a);
+  };
+  const snap = (t, r) => {
+    const view = edViewRange(), tol = 8 / Math.max(1, r.width) * (view.b - view.a);
+    let best = t, dist = tol;
+    for (const w of ED.data.words) for (const x of [ED.data.clip.start + w.s, ED.data.clip.start + w.e]) {
+      const d = Math.abs(x - t); if (d < dist) { dist = d; best = x; }
+    }
+    return best;
+  };
+  track.addEventListener("pointerdown", e => {
+    const h = e.target.dataset?.h;
+    if (h) { mode = h; ED.view = edViewRange(); edPush(); e.preventDefault(); e.target.setPointerCapture?.(e.pointerId); return; }
+    mode = "seek"; track.setPointerCapture?.(e.pointerId); edSeek(at(e)); e.preventDefault();
+  });
+  track.addEventListener("pointermove", e => {
+    if (!mode) return;
+    const r = track.getBoundingClientRect();
+    if (mode === "seek") return edSeek(at(e));
+    const w = ED.data.window, minL = ED.data.limits.min_len, maxL = ED.data.limits.max_len;
+    let a = Number(edVal("start")), b = Number(edVal("end"));
+    let t = e.altKey ? at(e) : snap(at(e), r);
+    if (mode === "l") a = Math.min(Math.max(t, w.min), b - minL);
+    else b = Math.max(Math.min(t, w.max), a + minL);
+    if (b - a > maxL) { if (mode === "l") a = b - maxL; else b = a + maxL; }
+    ED.draft.start = Math.round(a * 100) / 100; ED.draft.end = Math.round(b * 100) / 100;
+    const v = $("#edvideo"), abs = v ? v.currentTime + ED.data.video.start : a;
+    if (abs < a || abs > b) edSeek(a);
+    edTimeline(); edMark(); edCheck(); edPending(); edDraw();
+  });
+  const done = () => { if (!mode) return; mode = null; ED.view = null; edTimeline(); };
+  track.addEventListener("pointerup", done); track.addEventListener("pointercancel", done);
+  track.addEventListener("dblclick", e => { if (!e.target.dataset?.h) { ED.view = null; edTimeline(); } });
+}
+// ---- what the editor saves, and when
+function edPush() {
+  ED.undo.push(JSON.stringify(ED.draft)); if (ED.undo.length > 80) ED.undo.shift(); ED.redo = [];
+  const u = $("#edundo"), r = $("#edredo"); if (u) u.disabled = false; if (r) r.disabled = true;
+}
+function edPushOnce() { if (ED.typing) return; edPush(); ED.typing = true; clearTimeout(ED.typeT); ED.typeT = setTimeout(() => { ED.typing = false; }, 900); }
+function edCheck() {
+  const on = edChanged(), chip = $("#eddirty");
+  if (chip) chip.hidden = !on;
+  const sv = $("#edsave"); if (sv && !ED.saving) sv.disabled = false;
+}
+function edPending() {
+  clearTimeout(ED.saveT);
+  ED.saveT = setTimeout(() => {
+    if (!ED.data) return;
+    const body = edChanged() ? {hook: String(edVal("hook") ?? ""), start: Number(edVal("start")), end: Number(edVal("end")),
+      captions: edCapsOn(), look: edBody().look} : {};
+    send(`/api/jobs/${ED.jid}/clips/${ED.cid}`, {draft: body}, "PATCH").catch(() => {});
+  }, 800);
+}
+function edSync() {
+  if (!ED.data) return;
+  const look = edLook(), c = ED.data.clip;
+  const setv = (id, v) => { const el = document.getElementById(id); if (!el) return;
+    if (el.type === "checkbox") el.checked = !!v; else if (document.activeElement !== el) el.value = v; };
+  setv("edhook", edVal("hook") ?? "");
+  setv("edcaps", edCapsOn() && look.cap.show);
+  setv("edlay", look.layout);
+  setv("edcapfont", look.cap.font);
+  setv("edcapsize", look.cap.size); setv("edcapsizen", look.cap.size);
+  setv("edcapper", look.cap.per);
+  setv("edcapanim", look.cap.anim);
+  setv("edcapcolor", edc(look.cap.color)); setv("edcaphigh", edc(look.cap.hi)); setv("edcapbgc", edc(look.cap.bgc));
+  setv("edcapoutline", look.cap.outline); setv("edcappop", look.cap.pop);
+  setv("edcapupper", look.cap.upper); setv("edcapbg", look.cap.bg);
+  setv("edcapy", look.cap.y == null ? edAutoCapY() : Number(look.cap.y)); setv("edcapyauto", look.cap.y == null);
+  setv("edhooksize", look.hook.size); setv("edhookcolor", edc(look.hook.color)); setv("edhookbgc", edc(look.hook.bgc));
+  setv("edhookoutline", look.hook.outline); setv("edhookupper", look.hook.upper); setv("edhookbg", look.hook.bg);
+  setv("edhookshow", look.hook.show);
+  setv("edhooky", look.hook.y == null ? edAutoHookY() : Number(look.hook.y)); setv("edhookyauto", look.hook.y == null);
+  const tpl = document.getElementById("edtpl");
+  if (tpl) {
+    const fit = t => t.look.layout === look.layout
+      && Object.entries(t.look.cap).every(([k, v]) => String(v ?? "") === String(look.cap[k] ?? ""))
+      && Object.entries(t.look.hook).every(([k, v]) => String(v ?? "") === String(look.hook[k] ?? ""));
+    const same = tplAll().find(fit);
+    tpl.value = same ? same.id : "";
+  }
+  const u = $("#edundo"), r = $("#edredo"); if (u) u.disabled = !ED.undo.length; if (r) r.disabled = !ED.redo.length;
+  edTimeline(); edMark(); edCheck();
+}
+const edAutoCapY = () => Math.round(edGeo(edLook()).cap * 100 / 1920);
+const edAutoHookY = () => Math.round(edGeo(edLook()).hook * 100 / 1920);
+function edAfter() { edSync(); edDraw(); edPending(); }
+function edSetRangeY(which, pct) {
+  const v = Math.max(0, Math.min(100, Math.round(Number(pct))));
+  edSet(which === "cap" ? "cap" : "hook", "y", v);
+}
+const edNum = (v, a, b) => Math.max(a, Math.min(b, Math.round(Number(v) || 0)));
+const ED_CTRL = {
+  edhook: v => edSet("clip", "hook", String(v).slice(0, 60)),
+  edcaps: v => { edSet("clip", "captions", !!v); edSet("cap", "show", !!v); },
+  edlay: v => edSet("layout", "", v),
+  edtpl: v => { const t = tplOf(v); if (t) ED.draft.look = {cap: {...t.look.cap}, hook: {...t.look.hook}, layout: t.look.layout}; },
+  edcapfont: v => edSet("cap", "font", v),
+  edcapsize: v => edSet("cap", "size", edNum(v, 60, 200)),
+  edcapper: v => edSet("cap", "per", edNum(v, 1, 5)),
+  edcapanim: v => edSet("cap", "anim", v),
+  edcapcolor: v => edSet("cap", "color", String(v).replace("#", "").toUpperCase()),
+  edcaphigh: v => edSet("cap", "hi", String(v).replace("#", "").toUpperCase()),
+  edcapbgc: v => edSet("cap", "bgc", String(v).replace("#", "").toUpperCase()),
+  edcapoutline: v => edSet("cap", "outline", edNum(v, 0, 14)),
+  edcappop: v => edSet("cap", "pop", edNum(v, 100, 120)),
+  edcapupper: v => edSet("cap", "upper", !!v),
+  edcapbg: v => edSet("cap", "bg", !!v),
+  edcapy: v => edSetRangeY("cap", v),
+  edcapyauto: v => edSet("cap", "y", v ? null : edAutoCapY()),
+  edhooksize: v => edSet("hook", "size", edNum(v, 60, 160)),
+  edhookcolor: v => edSet("hook", "color", String(v).replace("#", "").toUpperCase()),
+  edhookbgc: v => edSet("hook", "bgc", String(v).replace("#", "").toUpperCase()),
+  edhookoutline: v => edSet("hook", "outline", edNum(v, 0, 14)),
+  edhookupper: v => edSet("hook", "upper", !!v),
+  edhookbg: v => edSet("hook", "bg", !!v),
+  edhookshow: v => edSet("hook", "show", !!v),
+  edhooky: v => edSetRangeY("hook", v),
+  edhookyauto: v => edSet("hook", "y", v ? null : edAutoHookY())
+};
+$("#eddialog").addEventListener("input", e => {
+  const el = e.target, id = el.id in ED_CTRL ? el.id : el.id.replace(/n$/, "");
+  const f = ED_CTRL[id]; if (!f || !ED.data) return;
+  const v = el.type === "checkbox" ? el.checked : el.value;      // read before the undo snapshot redraws the controls
+  edPushOnce();
+  f(v);
+  edAfter();
+});
+$("#eddialog").addEventListener("change", e => {
+  if (e.target.tagName === "SELECT" || e.target.type === "range") ED.typing = false;
+});
+function edTrimTo(edge, abs) {
+  const w = ED.data.window, minL = ED.data.limits.min_len, maxL = ED.data.limits.max_len;
+  let a = Number(edVal("start")), b = Number(edVal("end"));
+  if (edge === "l") a = Math.min(Math.max(abs, w.min), b - minL);
+  else b = Math.max(Math.min(abs, w.max), a + minL);
+  if (b - a > maxL) { if (edge === "l") a = b - maxL; else b = a + maxL; }
+  ED.draft.start = Math.round(a * 100) / 100; ED.draft.end = Math.round(b * 100) / 100;
+  edAfter();
+}
+function edAt() {
+  const v = $("#edvideo");
+  return v && v.currentTime ? v.currentTime + ED.data.video.start : Number(edVal("start"));
+}
+function edKeys(e) {
+  if (!ED.data) return;
+  const t = e.target, typing = (t.tagName === "INPUT" && !["range", "checkbox", "color"].includes(t.type)) || t.tagName === "TEXTAREA";
+  if (typing) return;
+  const k = e.key;
+  if (k === " ") { e.preventDefault(); return edAct("edplay"); }
+  if (k === "ArrowLeft" || k === "ArrowRight") {
+    e.preventDefault();
+    return edSeek(edAt() + (k === "ArrowRight" ? 1 : -1) * (e.shiftKey ? 1 : .1));
+  }
+  if (k === "i" || k === "I") { e.preventDefault(); edPushOnce(); return edTrimTo("l", edAt()); }
+  if (k === "o" || k === "O") { e.preventDefault(); edPushOnce(); return edTrimTo("r", edAt()); }
+  if (k === "Home") { e.preventDefault(); return edSeek(Number(edVal("start"))); }
+  if (k === "End") { e.preventDefault(); return edSeek(Number(edVal("end"))); }
+  if ((e.ctrlKey || e.metaKey) && (k === "z" || k === "Z")) { e.preventDefault(); return edAct(e.shiftKey ? "edredo" : "edundo"); }
+  if ((e.ctrlKey || e.metaKey) && k === "Enter") { e.preventDefault(); return edAct("edsave"); }
+}
+function edAct(a, d) {
+  if (!ED.data) { if (a === "edclose") $("#eddialog").close(); return; }
+  const v = $("#edvideo");
+  if (a === "edclose") return $("#eddialog").close();
+  if (a === "edtab") {
+    $$("#eddialog [data-pane]").forEach(x => { x.hidden = x.dataset.pane !== d.k; });
+    $$("#eddialog .ed3-tabs button").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.k === d.k)));
+    return;
+  }
+  if (a === "edplay") {
+    if (!v) return;
+    if (v.paused) { if (v.currentTime + ED.data.video.start < Number(edVal("start"))) edSeek(Number(edVal("start"))); v.play().catch(() => {}); }
+    else v.pause();
+    return;
+  }
+  if (a === "edmute") { if (v) v.muted = !v.muted; return edPaintTransport(); }
+  if (a === "edundo") { if (!ED.undo.length) return; ED.redo.push(JSON.stringify(ED.draft)); ED.draft = JSON.parse(ED.undo.pop()); return edAfter(); }
+  if (a === "edredo") { if (!ED.redo.length) return; ED.undo.push(JSON.stringify(ED.draft)); ED.draft = JSON.parse(ED.redo.pop()); return edAfter(); }
+  if (a === "edreset") { edPush(); ED.draft = {}; return edAfter(); }
+  if (a === "edsave") return edSave();
+}
+async function edSave() {
+  if (ED.saving || !ED.data) return;
+  ED.saving = true;
+  const jid = ED.jid, cid = ED.cid;
+  const before = Number(ED.data.clip.version || 0), note = $("#ednote"), b = $("#edsave");
+  if (b) { b.disabled = true; b.textContent = "Making…"; }
+  if (note) note.textContent = "Waiting its turn…";
+  try {
+    await send(`/api/jobs/${jid}/clips/${cid}/render`, edBody());
+    const done = await edWait(before);
+    if (ED.jid !== jid || ED.cid !== cid || !ED.data) return;    // closed while it was being made
+    ED.saving = false;
+    const at = $("#edvideo")?.currentTime || 0;
+    ED.draft = {};
+    ED.data = await api(`/api/jobs/${jid}/clips/${cid}/editor`);
+    edBuild();
+    const nv = $("#edvideo");
+    if (nv) nv.addEventListener("loadedmetadata", () => { try { nv.currentTime = at; } catch {} edDraw(); }, {once: true});
+    toast(`Clip updated (version ${done.version}).`, "ok");
+  } catch (e) { toast(e.message, "bad"); }
+  finally {
+    ED.saving = false;
+    const sv = $("#edsave");
+    if (sv) { sv.disabled = false; sv.innerHTML = `${ic("scissors")}Update video`; }
+    if ($("#ednote")) $("#ednote").textContent = "";
+  }
+}
+function edWait(before) {
+  return new Promise((resolve, reject) => {
+    const t0 = Date.now();
+    const step = async () => {
+      try {
+        if (!ED.data) return resolve({});                    // the editor was closed while it was making
+        const j = await api(`/api/jobs/${ED.jid}`);
+        const c = (j.clips || []).find(x => x.id === ED.cid);
+        if (!c) return reject(new Error("This clip was deleted."));
+        if (c.status === "error") return reject(new Error(c.error || "The clip could not be made."));
+        if (c.status === "done" && Number(c.version || 0) > before) return resolve(c);
+        if ($("#ednote")) $("#ednote").textContent = c.status === "rendering" ? "Making the clip…" : "Waiting its turn…";
+        if (Date.now() - t0 > 15 * 60 * 1000) return reject(new Error("The clip is taking too long. Check its page."));
+        ED.poll = setTimeout(step, 1500);
+      } catch (e) { reject(e); }
+    };
+    step();
+  });
+}
+
+
 function render() {
   drawShell(); drawJobs(); drawStream(); drawSelBar();
   if (S.view === "overview") drawOverview();
@@ -6349,6 +7059,8 @@ document.addEventListener("click", async e => {
     }
     if (a === "addmore") { const u = $("#url"); return u && !u.value ? (u.focus(), toast("Paste another link, or drop a file anywhere on the box.")) : $("#file").click(); }
     if (a === "closedlg") return $("#clipdlg").close();
+    if (a === "openedit") { const cd = $("#clipdlg"); if (cd?.open) cd.close(); return openEditor(d.j, d.c); }
+    if (a.startsWith("ed") && ["edclose", "edtab", "edplay", "edmute", "edundo", "edredo", "edreset", "edsave"].includes(a)) return edAct(a, d);
     if (a === "openclip") return openClip(d.j, d.c);
     if (a === "newcreator") {
       const dlg = $("#formdlg");

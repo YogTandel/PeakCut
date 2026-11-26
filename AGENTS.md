@@ -64,6 +64,11 @@ are there, and only then offer to delete the old folder. Never delete anything w
   from `options["lang"]` (or a creator's `lang`) and is passed to `transcribe.transcribe(..., lang=...)`.
 - **Clips are rendered in a short temporary folder** and moved into place (`render.render_clip`): ffmpeg's caption
   step cannot open paths longer than 260 characters on Windows.
+- **The clip editor** is in `web/index.html` (`#eddialog`, the `ED` block). It reads
+  `GET /api/jobs/<jid>/clips/<cid>/editor` and streams that clip's picture from `/source`; "Update video" posts the
+  same clip to the existing `/render` route with `start`, `end`, `hook`, `captions` and a partial `look`. A new look
+  field the editor may change must be listed in `jobs.CAP_KEYS` or `jobs.HOOK_KEYS` and understood by
+  `templates.clean_look`; `jobs.editor_state` is what the page draws from.
 - **Secrets** are read from the environment or from files named by `*_FILE` settings. Never write a key, a real
   address or a personal path into a tracked file.
 - **Pages** are plain HTML, CSS and JavaScript. Keep the existing palette, no shadows, and hover states that
