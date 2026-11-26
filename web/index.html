@@ -1751,72 +1751,126 @@ a.cw-r:hover{background:#EDE3DB}a.cw-r:hover>svg{color:var(--text)}
 .ce3 .ce-go{flex:none;height:44px;min-height:44px;font-size:14px;margin-top:4px}
 .ce3 .ce2-when{flex:none}
 
-/* ---- the video editor: the clipper's studio, in PeakCut's colours. Left: the clip as it will look, drawn in the
-   browser from the source video. Right: the look. Below: the clip on a timeline you can trim. */
-#eddialog{width:min(1220px,calc(100vw - 24px));max-width:calc(100vw - 24px);padding:0;overflow:hidden}
-.ed3{display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;height:min(88vh,940px);background:var(--bg)}
-.ed3-head{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line)}
-.ed3-title{display:flex;flex-direction:column;min-width:0;flex:1}
-.ed3-title b{font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ed3-title span{font-size:12px;color:var(--faint)}
-.ed3-acts{display:flex;align-items:center;gap:8px;flex:none}
-.ed3-chip{font-size:11.5px;font-weight:700;color:var(--brand-deep);background:var(--brand-soft);border-radius:999px;padding:3px 10px;white-space:nowrap}
-.ed3-body{display:grid;grid-template-columns:minmax(0,1fr) 340px;min-height:0;background:var(--muted)}
-.ed3-stage{display:flex;flex-direction:column;min-height:0;padding:12px;gap:8px;overflow:hidden}
-.ed3-frame{flex:1;min-height:0;position:relative}
-.ed3-frame video{position:absolute;left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none}
+/* ---- the clip editor: a page of its own, laid out like a studio (the arrangement supoclip uses) in PeakCut's
+   colours: the picture and its transport in the middle, the look on the right, the timeline underneath. */
+body.editing{overflow:hidden}
+body.editing .app,body.editing .scrim{display:none}
+#edpage{position:fixed;inset:0;z-index:5;background:var(--muted)}
+#edpage>.edp{height:100%;display:flex;flex-direction:column;min-height:0}
+.edp-head{flex:none;height:56px;display:flex;align-items:center;gap:10px;padding:0 12px;background:#fff;border-bottom:1px solid var(--line)}
+.edp-back{width:34px;height:34px;border-radius:50%;border:0;background:transparent;display:grid;place-items:center;color:var(--dim);cursor:pointer;flex:none}
+.edp-back:hover{background:var(--muted);color:var(--text)}
+.edp-back svg{width:18px;height:18px}
+.edp-crumb{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
+.edp-crumb>b{font-size:14px;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:38%}
+.edp-crumb>i{font-style:normal;color:var(--faint)}
+.edp-clip{display:flex;align-items:center;gap:8px;height:34px;padding:0 10px 0 4px;border:1px solid var(--line);border-radius:999px;background:#fff;cursor:pointer;font:inherit;font-size:12.5px;font-weight:600;color:var(--text);min-width:0;transition:border-color .15s ease}
+.edp-clip:hover{border-color:var(--line-2)}
+.edp-clip img{width:22px;height:27px;border-radius:4px;object-fit:cover;background:var(--muted);flex:none}
+.edp-clip span{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.edp-clip small{color:var(--faint);font-weight:500;font-variant-numeric:tabular-nums}
+.edp-clip svg{width:14px;height:14px;color:var(--faint)}
+.edp-menu{position:absolute;top:52px;left:0;z-index:20;background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px;width:288px;max-height:60vh;overflow:auto}
+.edp-menu button{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;padding:6px;border-radius:8px;text-align:left;cursor:pointer;font:inherit}
+.edp-menu button:hover{background:var(--muted)}
+.edp-menu button.on{background:var(--brand-soft)}
+.edp-menu img{width:28px;height:38px;object-fit:cover;border-radius:4px;flex:none;background:var(--muted)}
+.edp-menu span{display:flex;flex-direction:column;min-width:0;font-size:12.5px}
+.edp-menu span b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.edp-menu span small{color:var(--faint);font-size:11.5px}
+.edp-status{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--faint);white-space:nowrap}
+.edp-status.on{color:var(--brand-deep)}
+.edp-status svg{width:14px;height:14px}
+.edp-acts{display:flex;align-items:center;gap:2px;flex:none}
+.edp-body{flex:1;display:flex;gap:8px;padding:8px 8px 0;min-height:0}
+.edp-main{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0;height:auto;margin:0;border-radius:0;background:transparent;overflow:visible}
+.edp-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 8px 6px;font-size:12px;color:var(--faint)}
+.edp-top .edp-tcs{font-variant-numeric:tabular-nums;font-weight:600;color:var(--dim)}
+.edp-safebtn{border:0;background:transparent;color:var(--faint);font:inherit;font-size:12px;font-weight:600;cursor:pointer;border-radius:8px;padding:4px 8px}
+.edp-safebtn:hover{background:#fff;color:var(--text)}
+.edp-safebtn.on{background:#fff;color:var(--text)}
+.edp-frame{flex:1;min-height:0;position:relative;display:grid;place-items:center}
+.edp-frame video{position:absolute;left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none}
 #edcanvas{position:absolute;inset:0;margin:auto;width:auto;height:auto;max-width:100%;max-height:100%;border-radius:12px;background:#0B0806;display:block}
-.ed3-wait{position:absolute;font-size:12.5px;color:var(--faint);background:rgba(255,255,255,.9);border-radius:8px;padding:5px 10px}
-.ed3-bar{display:flex;align-items:center;gap:8px;flex:none;padding:0 2px}
-.ed3-time{font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums;white-space:nowrap;min-width:118px}
-.ed3-seek{flex:1;accent-color:var(--brand);min-width:0}
-.ed3-side{background:#fff;border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
-.ed3-tabs{margin:10px 12px 0;background:var(--muted)}
-.ed3-tabs button{flex-direction:row;padding:7px 4px;font-size:12.5px}
-.ed3-panes{overflow:auto;padding:12px;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin}
-.ed3-grp{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:9px}
-.ed3-grp h4{margin:0;font-size:11px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;display:flex;justify-content:space-between;align-items:center}
-.ed3-grp h4 small{font-size:11px;font-weight:600;color:var(--dim);text-transform:none;letter-spacing:0}
+.ed3-wait{position:absolute;font-size:12.5px;color:var(--dim);background:#fff;border:1px solid var(--line);border-radius:8px;padding:5px 10px}
+.edp-transport{flex:none;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:4px 10px 8px}
+.edp-tra{display:flex;align-items:center;gap:2px}
+.edp-tra.right{justify-content:flex-end;gap:6px}
+.edp-tc{font-variant-numeric:tabular-nums;font-size:12.5px;font-weight:650;padding:5px 11px;border-radius:999px;background:#fff;border:1px solid var(--line)}
+.edp-play{width:46px;height:46px;border-radius:50%;border:0;background:var(--brand);color:var(--brand-ink);display:grid;place-items:center;cursor:pointer;transition:background-color .15s ease}
+.edp-play:hover{background:var(--brand-press)}
+.edp-play svg{width:20px;height:20px}
+.edp-dur{font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums;white-space:nowrap}
+.edp-insp{width:320px;flex:none;display:flex;flex-direction:column;min-height:0;background:#fff;border:1px solid var(--line);border-radius:16px;margin-bottom:8px}
+.edp-insp-head{flex:none;display:flex;align-items:center;gap:6px;padding:8px;border-bottom:1px solid var(--line)}
+.edp-tabs{display:flex;gap:2px;background:var(--muted);border-radius:10px;padding:3px;flex:1}
+.edp-tabs button{flex:1;border:0;background:transparent;padding:7px 4px;border-radius:7px;font:inherit;font-size:12.5px;font-weight:600;color:var(--dim);cursor:pointer;transition:background-color .15s ease,color .15s ease}
+.edp-tabs button:hover{color:var(--text)}
+.edp-tabs button[aria-pressed=true]{background:#fff;color:var(--text)}
+.edp-panes{flex:1;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin}
+.edp-sec{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:9px}
+.edp-sec h4{margin:0;font-size:10.5px;font-weight:750;color:var(--faint);text-transform:uppercase;letter-spacing:.07em;display:flex;justify-content:space-between;align-items:center}
+.edp-sec h4 small{font-size:11px;font-weight:600;color:var(--dim);text-transform:none;letter-spacing:0}
 .ed3-row{display:flex;align-items:center;gap:8px}
 .ed3-row>span{width:78px;flex:none;font-size:12px;color:var(--dim);font-weight:600}
 .ed3-row>input[type=range]{flex:1;min-width:0;accent-color:var(--brand)}
-.ed3-row>input[type=number]{width:62px;flex:none}
-.ed3-grp select,.ed3-grp input[type=text],.ed3-grp input[type=number],.ed3-grp textarea{border:1px solid var(--line-2);border-radius:9px;padding:7px 9px;font:inherit;font-size:13px;background:#fff;color:var(--text);width:100%;min-width:0}
-.ed3-grp textarea{resize:vertical;min-height:52px}
-.ed3-grp select:focus,.ed3-grp input:focus,.ed3-grp textarea:focus{border-color:var(--brand)}
-.ed3-grp input[type=color]{width:38px;height:30px;padding:2px;border:1px solid var(--line-2);border-radius:8px;background:#fff;flex:none;cursor:pointer}
-.ed3-sw{display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:600;color:var(--text);cursor:pointer}
+.ed3-row>input[type=number]{width:60px;flex:none}
+.edp-sec select,.edp-sec input[type=text],.edp-sec input[type=number],.edp-sec textarea{border:1px solid var(--line-2);border-radius:9px;padding:7px 9px;font:inherit;font-size:13px;background:#fff;color:var(--text);width:100%;min-width:0}
+.edp-sec textarea{resize:vertical;min-height:52px}
+.edp-sec select:focus,.edp-sec input:focus,.edp-sec textarea:focus{border-color:var(--brand)}
+.edp-sec input[type=color]{width:38px;height:30px;padding:2px;border:1px solid var(--line-2);border-radius:8px;background:#fff;flex:none;cursor:pointer}
+.edp-sec .ed3-sw,.ed3-sw{display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:600;color:var(--text);cursor:pointer}
 .ed3-sw input{appearance:none;width:36px;height:21px;border-radius:999px;background:#DCD2D0;position:relative;cursor:pointer;flex:none;margin:0;transition:background-color .15s ease}
 .ed3-sw input::after{content:"";position:absolute;top:3px;left:3px;width:15px;height:15px;border-radius:50%;background:#fff;transition:transform .15s}
 .ed3-sw input:checked{background:var(--brand)}.ed3-sw input:checked::after{transform:translateX(15px)}
 .ed3-hint{font-size:11.5px;color:var(--faint);line-height:1.45}
-.ed3-tl{border-top:1px solid var(--line);background:#fff;padding:0 14px 10px}
-.ed3-ruler{height:19px;position:relative;border-bottom:1px solid var(--line)}
-.ed3-ruler span{position:absolute;top:2px;font-size:10.5px;color:var(--faint);transform:translateX(-50%);font-variant-numeric:tabular-nums}
-.ed3-track{position:relative;height:62px;margin-top:8px;border:1px solid var(--line);border-radius:10px;background:var(--muted);overflow:hidden;cursor:crosshair;touch-action:none}
-.ed3-words{position:absolute;inset:0;pointer-events:none}
-.ed3-w{position:absolute;bottom:9px;height:26px;background:#E4DAD4;border-radius:3px;min-width:2px}
+.edp-tl{flex:none;height:238px;padding:0 8px 8px}
+.edp-tlpanel{height:100%;background:#fff;border:1px solid var(--line);border-radius:16px;display:flex;flex-direction:column;min-height:0}
+.edp-tlbar{flex:none;display:flex;align-items:center;gap:10px;padding:7px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.edp-tool{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 9px;border:1px solid var(--line);border-radius:8px;background:#fff;font:inherit;font-size:12px;font-weight:600;color:var(--dim);cursor:pointer}
+.edp-tool:hover{border-color:var(--line-2);color:var(--text)}
+.edp-tool svg{width:14px;height:14px}
+.edp-io{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim);font-weight:600}
+.edp-io input{width:76px;height:28px;border:1px solid var(--line-2);border-radius:8px;padding:0 8px;font:inherit;font-size:12px;font-variant-numeric:tabular-nums;color:var(--text);background:#fff}
+.edp-len{font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums}
+.edp-zoom{display:flex;align-items:center;gap:6px;margin-left:auto;font-size:12px;color:var(--faint)}
+.edp-zoom input[type=range]{width:110px;accent-color:var(--brand)}
+.edp-lanes{flex:1;display:flex;gap:6px;min-height:0;padding:6px 10px 8px 8px}
+.edp-rail{width:52px;flex:none;display:flex;flex-direction:column;gap:4px;padding-top:18px;font-size:10px;color:var(--faint);text-align:right;line-height:1}
+.edp-rail span{display:flex;align-items:center;justify-content:flex-end;height:56px}
+.edp-rail span.slim{height:26px}
+.edp-rail span.caps{height:38px}
+.edp-lanesbody{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+.edp-ruler{height:18px;flex:none;position:relative;border-bottom:1px solid var(--line)}
+.edp-ruler span{position:absolute;top:2px;font-size:10px;color:var(--faint);transform:translateX(-50%);font-variant-numeric:tabular-nums;white-space:nowrap}
+.edp-track{flex:1;position:relative;display:flex;flex-direction:column;gap:4px;touch-action:none;cursor:crosshair;min-height:0;padding-top:2px}
+.edp-lane{position:relative;border-radius:8px;background:var(--muted);overflow:hidden;flex:none}
+.edp-lane[data-lane=video]{height:56px}
+.edp-lane[data-lane=hook]{height:26px}
+.edp-lane[data-lane=cap]{flex:1;min-height:34px}
+.edp-seg{position:absolute;top:0;bottom:0;border-radius:7px;overflow:hidden;background:#0B0806 center/cover no-repeat;display:flex;align-items:flex-end}
+.edp-seg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.45))}
+.edp-seg b{position:relative;z-index:1;margin:0 0 4px 8px;font-size:10.5px;font-weight:650;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.edp-hookbar{position:absolute;top:3px;bottom:3px;border-radius:6px;background:var(--brand-soft);border:1px solid var(--brand-line);color:var(--brand-deep);font-size:11px;font-weight:600;display:flex;align-items:center;padding:0 7px;overflow:hidden;white-space:nowrap}
+.ed3-words{position:absolute;inset:0}
+.ed3-w{position:absolute;bottom:5px;height:20px;background:#E4DAD4;border-radius:3px;min-width:2px}
 .ed3-w.on{background:var(--brand-line)}
-.ed3-sel{position:absolute;top:0;bottom:0;border-left:2px solid var(--brand);border-right:2px solid var(--brand);background:rgba(255,139,51,.10)}
-.ed3-sel i.h{position:absolute;top:0;bottom:0;width:13px;background:var(--brand);cursor:ew-resize;border-radius:3px;touch-action:none}
+.ed3-sel{position:absolute;top:0;bottom:0;border-left:2px solid var(--brand);border-right:2px solid var(--brand);background:rgba(255,139,51,.07);pointer-events:none}
+.ed3-sel i.h{pointer-events:auto;position:absolute;top:2px;bottom:2px;width:13px;background:var(--brand);cursor:ew-resize;border-radius:4px;touch-action:none}
 .ed3-sel i.h.l{left:-7px}.ed3-sel i.h.r{right:-7px}
-.ed3-sel i.h::after{content:"";position:absolute;left:5px;top:50%;width:2px;height:15px;margin-top:-7.5px;background:rgba(255,255,255,.75);border-radius:2px}
-.ed3-ph{position:absolute;top:0;bottom:0;width:2px;background:var(--text);pointer-events:none}
-.ed3-ph::before{content:"";position:absolute;top:-1px;left:-4px;border:5px solid transparent;border-top-color:var(--text)}
-.ed3-foot{display:flex;align-items:center;gap:8px;padding:9px 14px;border-top:1px solid var(--line);background:#fff}
-.ed3-note{font-size:12px;color:var(--dim);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ed3-sel i.h::after{content:"";position:absolute;left:5px;top:50%;width:2px;height:14px;margin-top:-7px;background:rgba(255,255,255,.8);border-radius:2px}
+.ed3-ph{position:absolute;top:-18px;bottom:0;width:2px;background:var(--text);pointer-events:none;z-index:3}
+.ed3-ph::before{content:"";position:absolute;top:0;left:-4px;width:10px;height:10px;border-radius:50%;background:var(--text);border:2px solid #fff}
 .ed3-load{padding:60px 24px;text-align:center;font-size:13.5px;color:var(--dim)}
-.btn.icon.ed-edit svg{width:16px;height:16px}
-@media (max-width:1050px){
-  .ed3-body{grid-template-columns:minmax(0,1fr) 300px}
+@media (max-width:1180px){.edp-insp{width:290px}.edp-crumb>b{max-width:26%}}
+@media (max-width:900px){
+  .edp-body{flex-direction:column;overflow:auto;padding-bottom:8px}
+  .edp-main{flex:none;min-height:min(62vh,440px)}
+  .edp-insp{width:auto;max-height:none;margin:0}
+  .edp-tl{height:220px}
+  .edp-crumb>b,.edp-crumb>i{display:none}
+  .edp-clip span{max-width:150px}
 }
-@media (max-width:760px){
-  .ed3-body{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) minmax(0,45%)}
-  .ed3-side{max-height:none;border-left:0;border-top:1px solid var(--line)}
-  #eddialog{width:calc(100vw - 12px);max-width:calc(100vw - 12px)}
-}
-
-
 .cmp-need{font-size:11.5px;font-weight:700;color:var(--brand-deep);background:var(--brand-soft);border-radius:999px;padding:3px 10px;white-space:nowrap}
 .cmp-setup{margin:14px 16px 0;padding:14px;border-radius:12px;background:var(--brand-soft);display:flex;flex-direction:column;gap:10px}
 .cmp-sh{display:flex;flex-direction:column;gap:2px}.cmp-sh b{font-size:14px;color:var(--brand-ink)}.cmp-sh span{font-size:12.5px;color:var(--dim)}
@@ -2322,7 +2376,7 @@ textarea.cpg-in{height:auto;padding:8px 12px;resize:vertical}.cpg-in:focus{borde
   </main>
 </div>
 <dialog id="clipdlg"></dialog>
-<dialog id="eddialog" aria-label="Clip editor"></dialog>
+<div id="edpage" hidden></div>
 <dialog id="formdlg"></dialog>
 <dialog id="schdlg" aria-label="Scheduled post"></dialog>
 <input type="file" id="file" accept="video/*" multiple hidden>
@@ -6220,7 +6274,8 @@ $("#clipdlg").addEventListener("click", e => { if (e.target === e.currentTarget)
    it the way the server will draw them, the timeline under it trims the clip, and the right side holds the look.
    Nothing is made until "Update video": the changes wait as a draft, then the clip is made again from them. */
 const ED = {jid: null, cid: null, data: null, draft: {}, undo: [], redo: [], play: false, raf: 0, poll: 0,
-            saveT: 0, typeT: 0, typing: false, saving: false, view: null, groups: "", words: [], font: ""};
+            saveT: 0, typeT: 0, typing: false, saving: false, view: null, groups: "", words: [], font: "",
+            safe: false, zoom: 1};
 const ED_SW = 720, ED_SH = 1280, ED_K = ED_SH / 1920;        // the frame is drawn at 9:16; sizes are the server's (1920 tall)
 const edc = v => "#" + String(v ?? "000000").replace(/^#/, "").slice(-6).padStart(6, "0");
 const edtc = t => { t = Math.max(0, Number(t) || 0); const m = Math.floor(t / 60); return `${m}:${(t - m * 60).toFixed(1).padStart(4, "0")}`; };
@@ -6277,17 +6332,26 @@ function edBody() {
 const ED_CAP = ["show", "anim", "font", "color", "hi", "outline", "shadow", "size", "per", "upper", "pop", "y", "bg", "bgc"];
 const ED_HOOK = ["show", "y", "font", "color", "outline", "size", "upper", "bg", "bgc"];
 
-async function openEditor(jid, cid) {
-  const dlg = $("#eddialog");
-  ED.jid = jid; ED.cid = cid; ED.data = null; ED.draft = {}; ED.undo = []; ED.redo = []; ED.play = false; ED.saving = false;
-  clearTimeout(ED.poll); clearTimeout(ED.saveT); ED.view = null;
-  dlg.innerHTML = `<div class="ed3"><div class="ed3-load">Opening the editor…</div></div>`;
-  if (!dlg.open) dlg.showModal();
+function openEditor(jid, cid) {
+  // the editor is a page of its own, not a pop-up: the address says which clip it is on
+  location.assign(`/app/editor/${encodeURIComponent(jid)}/${encodeURIComponent(cid)}`);
+}
+function edRoute() {
+  const m = location.pathname.match(/^\/app\/editor\/([^/]+)\/([^/]+)\/?$/);
+  return m ? [decodeURIComponent(m[1]), decodeURIComponent(m[2])] : null;
+}
+async function startEditorPage(jid, cid) {
+  const page = $("#edpage");
+  document.body.classList.add("editing");
+  page.hidden = false;
+  page.innerHTML = `<div class="ed3-load">Opening the editor…</div>`;
+  ED.jid = jid; ED.cid = cid; ED.data = null; ED.draft = {}; ED.undo = []; ED.redo = []; ED.play = false;
+  ED.saving = false; ED.safe = false; ED.zoom = 1; clearTimeout(ED.poll); clearTimeout(ED.saveT); ED.view = null;
   if (!Object.keys(S.tpl.fonts || {}).length) await loadTpls();
   try { ED.data = await api(`/api/jobs/${jid}/clips/${cid}/editor`); }
   catch (e) {
-    dlg.innerHTML = `<div class="ed3"><div class="ed3-load">${esc(e.message)}</div>
-      <div class="ed3-foot"><span class="grow"></span><button class="btn" data-act="edclose">Close</button></div></div>`;
+    page.innerHTML = `<div class="ed3-load">${esc(e.message)}</div>
+      <p style="text-align:center"><a class="btn" href="/app/library">Back to All videos</a></p>`;
     return;
   }
   const saved = ED.data.clip.draft;
@@ -6299,15 +6363,20 @@ function edTeardown() {
   cancelAnimationFrame(ED.raf); clearTimeout(ED.poll); clearTimeout(ED.saveT);
   try { ED.ro?.disconnect(); } catch {}
   const v = $("#edvideo"); if (v) { try { v.pause(); v.removeAttribute("src"); v.load(); } catch {} }
-  const was = ED.jid; ED.data = null; ED.play = false;
-  $("#eddialog").innerHTML = "";
-  if (was) tick();
+  ED.data = null; ED.play = false;
 }
-$("#eddialog").addEventListener("close", edTeardown);
-$("#eddialog").addEventListener("click", e => { if (e.target === e.currentTarget) e.currentTarget.close(); });
-
+const ED_IC = {
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
+  skipStart: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM19 6v12l-9-6z"/></svg>',
+  skipEnd: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM5 6v12l9-6z"/></svg>',
+  stepBack: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M15 6v12l-9-6z"/></svg>',
+  stepFwd: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 6v12l9-6z"/></svg>',
+  undo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h9a6 6 0 0 1 0 12h-3"/></svg>',
+  redo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 14l5-5-5-5"/><path d="M20 9h-9a6 6 0 0 0 0 12h3"/></svg>'
+};
+function edClipLabel(c) { return (c.title || c.hook || "Untitled clip").slice(0, 60); }
 function edBuild() {
-  const c = ED.data.clip, look = edLook();
+  const c = ED.data.clip, look = edLook(), job = jobOf(ED.jid);
   const tpls = tplAll().map(t => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join("");
   const fonts = Object.keys(S.tpl.fonts || {}).map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join("");
   const anims = Object.entries(S.tpl.anims || {pop: "Pop"}).map(([k, n]) => `<option value="${esc(k)}">${esc(n)}</option>`).join("");
@@ -6315,92 +6384,127 @@ function edBuild() {
   const sw = (id, on, label) => `<label class="ed3-sw"><input type="checkbox" id="${id}"${on ? " checked" : ""}>${label}</label>`;
   const numRow = (label, id, min, max, step, unit = "") => `<div class="ed3-row"><span>${label}</span>
     <input type="range" id="${id}" min="${min}" max="${max}" step="${step}"><input type="number" id="${id}n" min="${min}" max="${max}" step="${step}" aria-label="${label}">${unit ? `<small class="ed3-hint">${unit}</small>` : ""}</div>`;
-  $("#eddialog").innerHTML = `<div class="ed3">
-    <header class="ed3-head">
-      <div class="ed3-title"><b>${esc(c.title || c.hook || "Untitled clip")}</b><span id="edmeta"></span></div>
-      <div class="ed3-acts"><span class="ed3-chip" id="eddirty" hidden>Not made yet</span>
-        <button class="btn icon ghost sm" data-act="edclose" aria-label="Close the editor">${ic("x")}</button></div>
+  $("#edpage").innerHTML = `<div class="edp">
+    <header class="edp-head">
+      <button class="edp-back" data-act="edclose" aria-label="Back to All videos">${ED_IC.back}</button>
+      <div class="edp-crumb"><b>${esc(job?.title || "Your video")}</b><i>/</i>
+        <button class="edp-clip" data-act="edclipmenu" aria-haspopup="menu" aria-expanded="false">
+          <img src="/media/${esc(ED.jid)}/${esc(c.cover || "")}?v=${c.version || 0}" alt="">
+          <span>${esc(edClipLabel(c))}</span><small>${fmt(Number(edVal("end")) - Number(edVal("start")))}</small>${ic("caret").replace("<svg", '<svg style="width:13px;height:13px"')}
+        </button>
+        <div class="edp-menu" id="edclipmenu" hidden></div>
+      </div>
+      <span class="edp-status" id="eddirty" role="status"></span>
+      <span class="ed3-note" id="ednote" aria-live="polite"></span>
+      <div class="edp-acts">
+        <button class="btn icon ghost sm" data-act="edundo" id="edundo" aria-label="Undo" title="Undo (Ctrl+Z)">${ED_IC.undo}</button>
+        <button class="btn icon ghost sm" data-act="edredo" id="edredo" aria-label="Redo" title="Redo (Ctrl+Shift+Z)">${ED_IC.redo}</button>
+      </div>
+      <button class="btn primary" data-act="edsave" id="edsave" title="Make the clip again with these changes (Ctrl+Enter)">${ic("scissors")}Update video</button>
     </header>
-    <div class="ed3-body">
-      <div class="ed3-stage">
-        <div class="ed3-frame">
+    <div class="edp-body">
+      <main class="edp-main">
+        <div class="edp-top"><span class="edp-tcs" id="edtcs"></span>
+          <button type="button" class="edp-safebtn" data-act="edsafe" id="edsafe" aria-pressed="false">Safe area</button></div>
+        <div class="edp-frame">
           <canvas id="edcanvas" width="${ED_SW}" height="${ED_SH}" aria-label="The clip as it will look"></canvas>
-          <video id="edvideo" src="${esc(ED.data.video.url)}" preload="auto" playsinline crossorigin="anonymous"></video>
+          <video id="edvideo" src="${esc(ED.data.video.url)}" preload="auto" playsinline></video>
           <span class="ed3-wait" id="edwait">Loading the video…</span>
         </div>
-        <div class="ed3-bar">
-          <button class="btn icon ghost sm" data-act="edplay" id="edplay" aria-label="Play">${VP.play}</button>
-          <span class="ed3-time" id="edtime">0:00.0 / 0:00.0</span>
-          <input type="range" class="ed3-seek" id="edseek" min="0" max="1000" step="1" value="0" aria-label="Playhead">
-          <button class="btn icon ghost sm" data-act="edmute" id="edmute" aria-label="Sound on or off">${VP.vol}</button>
+        <div class="edp-transport">
+          <div class="edp-tra">
+            <button class="btn icon ghost sm" data-act="edskipstart" aria-label="Go to the start (Home)">${ED_IC.skipStart}</button>
+            <button class="btn icon ghost sm" data-act="edstep" data-d="-1" aria-label="One step back">${ED_IC.stepBack}</button>
+            <span class="edp-tc" id="edtime">0:00.0</span>
+            <button class="btn icon ghost sm" data-act="edstep" data-d="1" aria-label="One step forward">${ED_IC.stepFwd}</button>
+            <button class="btn icon ghost sm" data-act="edskipend" aria-label="Go to the end (End)">${ED_IC.skipEnd}</button>
+          </div>
+          <button class="edp-play" data-act="edplay" id="edplay" aria-label="Play">${VP.play}</button>
+          <div class="edp-tra right">
+            <span class="edp-dur" id="eddur"></span>
+            <button class="btn icon ghost sm" data-act="edmute" id="edmute" aria-label="Sound on or off">${VP.vol}</button>
+            <button class="btn icon ghost sm" data-act="edfull" aria-label="Full screen">${VP.fs}</button>
+          </div>
         </div>
-      </div>
-      <aside class="ed3-side">
-        <div class="seg ed3-tabs" role="tablist">
-          <button role="tab" data-act="edtab" data-k="look" aria-pressed="true">Style</button>
-          <button role="tab" data-act="edtab" data-k="cap" aria-pressed="false">Captions</button>
-          <button role="tab" data-act="edtab" data-k="hook" aria-pressed="false">Heading</button>
+      </main>
+      <aside class="edp-insp" aria-label="The look">
+        <div class="edp-insp-head">
+          <div class="edp-tabs" role="tablist">
+            <button role="tab" data-act="edtab" data-k="look" aria-pressed="true">Style</button>
+            <button role="tab" data-act="edtab" data-k="cap" aria-pressed="false">Captions</button>
+            <button role="tab" data-act="edtab" data-k="hook" aria-pressed="false">Heading</button>
+          </div>
         </div>
-        <div class="ed3-panes">
+        <div class="edp-panes">
           <div data-pane="look">
-            <div class="ed3-grp"><h4>Style</h4>
+            <div class="edp-sec"><h4>Style</h4>
               <div class="ed3-row"><span>Template</span><select id="edtpl"><option value="">As it is now</option>${tpls}</select></div>
               <div class="ed3-row"><span>Layout</span><select id="edlay">${lays}</select></div>
-              ${sw("edcaps", edCapsOn(), "Captions on the video")}
+              ${sw("edcaps", edCapsOn() && look.cap.show, "Captions on the video")}
             </div>
-            <div class="ed3-grp" style="margin-top:12px"><h4>Where they sit</h4>
+            <div class="edp-sec" style="margin-top:10px"><h4>Where they sit</h4>
               ${numRow("Caption height", "edcapy", 0, 100, 1, "%")}
-              ${sw("edcapyauto", edLook().cap.y == null, "Automatic (under the picture)")}
+              ${sw("edcapyauto", look.cap.y == null, "Automatic (under the picture)")}
               ${numRow("Heading height", "edhooky", 0, 100, 1, "%")}
-              ${sw("edhookyauto", edLook().hook.y == null, "Automatic (above the picture)")}
-              <p class="ed3-hint">The picture, the heading and the captions are laid out the same way the server draws them. The two heights only matter once set.</p>
+              ${sw("edhookyauto", look.hook.y == null, "Automatic (above the picture)")}
+              <p class="ed3-hint">The picture, the heading and the captions are laid out as the server draws them; the two heights only matter once set.</p>
             </div>
           </div>
           <div data-pane="cap" hidden>
-            <div class="ed3-grp"><h4>Captions</h4>
+            <div class="edp-sec"><h4>Captions</h4>
               <div class="ed3-row"><span>Font</span><select id="edcapfont">${fonts}</select></div>
               ${numRow("Size", "edcapsize", 60, 200, 1, "px at 1920")}
               ${numRow("Words a line", "edcapper", 1, 5, 1)}
               <div class="ed3-row"><span>Animation</span><select id="edcapanim">${anims}</select></div>
-              <div class="ed3-row"><span>Colour</span><input type="color" id="edcapcolor"><input type="color" id="edcaphigh" aria-label="Highlight colour"><span style="width:auto;font-weight:400">said word</span></div>
+              <div class="ed3-row"><span>Colour</span><input type="color" id="edcapcolor"><input type="color" id="edcaphigh" aria-label="Highlight colour"><small class="ed3-hint">said word</small></div>
               ${numRow("Outline", "edcapoutline", 0, 14, 1, "px")}
               ${numRow("Pop", "edcappop", 100, 120, 1, "% bigger")}
-              ${sw("edcapupper", edLook().cap.upper, "CAPITALS")}
-              ${sw("edcapbg", edLook().cap.bg, "A box behind the words")}
+              ${sw("edcapupper", look.cap.upper, "CAPITALS")}
+              ${sw("edcapbg", look.cap.bg, "A box behind the words")}
               <div class="ed3-row"><span>Box colour</span><input type="color" id="edcapbgc"></div>
             </div>
           </div>
           <div data-pane="hook" hidden>
-            <div class="ed3-grp"><h4>Heading</h4>
+            <div class="edp-sec"><h4>Heading</h4>
               <textarea id="edhook" maxlength="60" placeholder="The big text at the top" aria-label="The heading">${esc(edVal("hook") ?? "")}</textarea>
               ${numRow("Size", "edhooksize", 60, 160, 1, "px at 1920")}
               <div class="ed3-row"><span>Colour</span><input type="color" id="edhookcolor"></div>
               ${numRow("Outline", "edhookoutline", 0, 14, 1, "px")}
-              ${sw("edhookupper", edLook().hook.upper, "CAPITALS")}
-              ${sw("edhookbg", edLook().hook.bg, "A box behind the heading")}
+              ${sw("edhookupper", look.hook.upper, "CAPITALS")}
+              ${sw("edhookbg", look.hook.bg, "A box behind the heading")}
               <div class="ed3-row"><span>Box colour</span><input type="color" id="edhookbgc"></div>
-              ${sw("edhookshow", edLook().hook.show, "Show the heading")}
+              ${sw("edhookshow", look.hook.show, "Show the heading")}
             </div>
           </div>
         </div>
       </aside>
     </div>
-    <div class="ed3-tl">
-      <div class="ed3-ruler" id="edruler"></div>
-      <div class="ed3-track" id="edtrack" aria-label="The clip on its video: drag the orange ends to trim">
-        <div class="ed3-words" id="edwords"></div>
-        <div class="ed3-sel" id="edsel"><i class="h l" data-h="l"></i><i class="h r" data-h="r"></i></div>
-        <div class="ed3-ph" id="edph"></div>
+    <div class="edp-tl">
+      <div class="edp-tlpanel">
+        <div class="edp-tlbar">
+          <span class="edp-io">In <input id="edin" type="number" step="0.1" aria-label="Clip start"></span>
+          <span class="edp-io">Out <input id="edout" type="number" step="0.1" aria-label="Clip end"></span>
+          <span class="edp-len" id="edlen"></span>
+          <button class="edp-tool" data-act="edreset" title="Back to the clip as it was">Reset</button>
+          <div class="edp-zoom"><button class="edp-tool" data-act="edfit" title="Show the whole video">Fit</button>
+            <input type="range" id="edzoom" min="1" max="8" step="0.5" value="1" aria-label="Zoom the timeline">
+            <span id="edzoomv">1×</span></div>
+        </div>
+        <div class="edp-lanes">
+          <div class="edp-rail" aria-hidden="true"><span>Video</span><span class="slim">Heading</span><span class="caps">Captions</span></div>
+          <div class="edp-lanesbody">
+            <div class="edp-ruler" id="edruler"></div>
+            <div class="edp-track" id="edtrack" aria-label="The clip on its video: drag the orange ends to trim">
+              <div class="edp-lane" data-lane="video"><div class="edp-seg" id="edseg"><b id="edsegcap"></b></div></div>
+              <div class="edp-lane" data-lane="hook"><div class="edp-hookbar" id="edhookbar"></div></div>
+              <div class="edp-lane" data-lane="cap"><div class="ed3-words" id="edwords"></div></div>
+              <div class="ed3-sel" id="edsel"><i class="h l" data-h="l" role="slider" aria-label="Trim the start" tabindex="0"></i><i class="h r" data-h="r" role="slider" aria-label="Trim the end" tabindex="0"></i></div>
+              <div class="ed3-ph" id="edph"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <footer class="ed3-foot">
-      <button class="btn sm ghost" data-act="edundo" id="edundo"><span class="flip">${ic("arrowr")}</span>Undo</button>
-      <button class="btn sm ghost" data-act="edredo" id="edredo">Redo${ic("arrowr")}</button>
-      <button class="btn sm ghost" data-act="edreset">Reset</button>
-      <span class="grow"></span>
-      <span class="ed3-note" id="ednote"></span>
-      <button class="btn primary" data-act="edsave" id="edsave">${ic("scissors")}Update video</button>
-    </footer>
   </div>`;
   edWire();
   edSync();
@@ -6413,14 +6517,21 @@ function edWire() {
   v.addEventListener("play", () => { ED.play = true; edPaintTransport(); edLoop(); });
   v.addEventListener("pause", () => { ED.play = false; edPaintTransport(); edDraw(); });
   v.addEventListener("seeked", () => { edDraw(); edMark(); });
-  $("#edseek").addEventListener("input", e => {
-    const view = edViewRange(); edSeek(view.a + Number(e.target.value) / 1000 * (view.b - view.a));
+  const zoom = $("#edzoom");
+  if (zoom) zoom.addEventListener("input", () => { ED.zoom = Number(zoom.value) || 1; ED.view = null; edTimeline(); edDraw(); });
+  ["edin", "edout"].forEach(k => {
+    const el = $("#" + k); if (!el) return;
+    el.addEventListener("change", () => {
+      const v = Number(el.value);
+      if (!Number.isFinite(v)) return edTimeline();
+      edPushOnce(); edTrimTo(k === "edin" ? "l" : "r", v); el.blur();
+    });
   });
   edTrackWire();
   ED.ro = new ResizeObserver(() => edTimeline()); ED.ro.observe($("#edtrack"));
   edTimeline(); edPaintTransport(); edMark();
 }
-$("#eddialog").addEventListener("keydown", edKeys);
+$("#edpage").addEventListener("keydown", edKeys);
 function edPaintTransport() {
   const b = $("#edplay"), v = $("#edvideo"), mu = $("#edmute");
   if (b) { b.innerHTML = ED.play ? VP.pause : VP.play; b.setAttribute("aria-label", ED.play ? "Pause" : "Play"); }
@@ -6434,7 +6545,7 @@ function edFont(name) {
 function edViewRange() {
   if (ED.view) return ED.view;
   const w = ED.data.window, a0 = Number(edVal("start")), b0 = Number(edVal("end"));
-  const pad = Math.max(8, b0 - a0);
+  const pad = Math.max(1.5, (b0 - a0) / (2 * Math.max(1, ED.zoom || 1)));
   let a = Math.max(w.min, a0 - pad), b = Math.min(w.max, b0 + pad);
   if (b - a < 8) { a = Math.max(w.min, a - 4); b = Math.min(w.max, b + 4); }
   if (b - a < 2) b = Math.min(w.max, a + 2);
@@ -6459,10 +6570,36 @@ function edTimeline() {
     return `<i class="ed3-w" style="left:${l.toFixed(3)}%;width:${Math.max(.12, r - l).toFixed(3)}%" title="${esc(w.w)}"></i>`;
   }).join("");
   put($("#edwords"), words);
-  const start = Number(edVal("start")), end = Number(edVal("end"));
+  const start = Number(edVal("start")), end = Number(edVal("end")), look = edLook();
   const sel = $("#edsel");
   sel.style.left = Math.max(0, x(start)) + "%";
   sel.style.width = Math.max(0, x(end) - Math.max(0, x(start))) + "%";
+  // the clip's own stretch of picture, and the heading's few seconds
+  const seg = $("#edseg");
+  if (seg) {
+    const l = Math.max(0, x(start)), r = Math.min(100, x(end));
+    seg.style.left = l + "%"; seg.style.width = Math.max(0, r - l) + "%";
+    const m = `/media/${ED.jid}/${ED.data.clip.cover}?v=${ED.data.clip.version || 0}`;
+    seg.style.backgroundImage = `url("${m}")`;
+    if ($("#edsegcap")) $("#edsegcap").textContent = `${fmt(Math.max(0, r - l ? (end - start) : 0))} · ${look.layout}`;
+  }
+  const hb = $("#edhookbar");
+  if (hb) {
+    const dur = end - start, a = start + (dur <= 1.5 ? 0 : 0.12), b = start + Math.min(4, Math.max(1.5, dur - .25));
+    const show = look.hook.show && String(edVal("hook") ?? "").trim();
+    hb.hidden = !show;
+    if (show) {
+      hb.style.left = Math.max(0, x(a)) + "%";
+      hb.style.width = Math.max(0, Math.min(100, x(b)) - Math.max(0, x(a))) + "%";
+      hb.textContent = String(edVal("hook")).slice(0, 40) + "  ·  " + edtc(b - a);
+    }
+  }
+  const zin = $("#edin"), zout = $("#edout"), len = $("#edlen"), zv = $("#edzoomv"), zs = $("#edzoom");
+  if (zin && document.activeElement !== zin) zin.value = start.toFixed(1);
+  if (zout && document.activeElement !== zout) zout.value = end.toFixed(1);
+  if (len) len.textContent = `${fmt(Math.max(0, end - start))} · ${look.layout}`;
+  if (zv) zv.textContent = `${(ED.zoom || 1)}×`;
+  if (zs && document.activeElement !== zs) zs.value = ED.zoom || 1;
   edMark();
 }
 function edMark() {
@@ -6470,12 +6607,10 @@ function edMark() {
   const abs = v.currentTime + ED.data.video.start, view = edViewRange();
   const pct = Math.max(0, Math.min(100, (abs - view.a) / (view.b - view.a) * 100));
   const ph = $("#edph"); if (ph) ph.style.left = pct + "%";
-  const seek = $("#edseek"); if (seek && document.activeElement !== seek) seek.value = Math.round(pct * 10);
-  const t = $("#edtime"); if (t) {
-    const len = Number(edVal("end")) - Number(edVal("start"));
-    t.textContent = `${edtc(Math.max(0, abs - Number(edVal("start"))))} / ${edtc(len)}`;
-  }
-  put($("#edmeta"), `${fmt(Number(edVal("end")) - Number(edVal("start")))} · ${ED.data.video.width}×${ED.data.video.height}`);
+  const start = Number(edVal("start")), len = Number(edVal("end")) - start;
+  const t = $("#edtime"); if (t) t.textContent = edtc(Math.max(0, abs - start));
+  put($("#eddur"), `of ${edtc(len)}`);
+  put($("#edtcs"), `IN ${edtc(0)} · OUT ${edtc(len)} · ${ED.data.video.width}×${ED.data.video.height}`);
 }
 function edSeek(abs) {
   const v = $("#edvideo"); if (!v) return;
@@ -6533,6 +6668,10 @@ function edDraw() {
       edCover(ctx, v, 0, 0, cv.width, cv.height / 2, "center", 0, .5);
       edCover(ctx, v, 0, cv.height / 2, cv.width, cv.height / 2, "center", .5, .5);
     }
+  }
+  if (ED.safe) {
+    ctx.save(); ctx.setLineDash([9, 7]); ctx.lineWidth = 2; ctx.strokeStyle = "rgba(255,255,255,.8)";
+    ctx.strokeRect(cv.width * .08, cv.height * .10, cv.width * .84, cv.height * .70); ctx.restore();
   }
   const abs = v && v.currentTime ? v.currentTime + ED.data.video.start : Number(edVal("start"));
   if (look.hook.show) edHookDraw(ctx, look, g, k, abs);
@@ -6669,7 +6808,10 @@ function edPush() {
 function edPushOnce() { if (ED.typing) return; edPush(); ED.typing = true; clearTimeout(ED.typeT); ED.typeT = setTimeout(() => { ED.typing = false; }, 900); }
 function edCheck() {
   const on = edChanged(), chip = $("#eddirty");
-  if (chip) chip.hidden = !on;
+  if (chip) {
+    chip.classList.toggle("on", on);
+    chip.innerHTML = `${on ? ic("warn") : ic("check")}<span>${on ? "Not made yet" : "Saved"}</span>`;
+  }
   const sv = $("#edsave"); if (sv && !ED.saving) sv.disabled = false;
 }
 function edPending() {
@@ -6748,7 +6890,7 @@ const ED_CTRL = {
   edhooky: v => edSetRangeY("hook", v),
   edhookyauto: v => edSet("hook", "y", v ? null : edAutoHookY())
 };
-$("#eddialog").addEventListener("input", e => {
+$("#edpage").addEventListener("input", e => {
   const el = e.target, id = el.id in ED_CTRL ? el.id : el.id.replace(/n$/, "");
   const f = ED_CTRL[id]; if (!f || !ED.data) return;
   const v = el.type === "checkbox" ? el.checked : el.value;      // read before the undo snapshot redraws the controls
@@ -6756,7 +6898,7 @@ $("#eddialog").addEventListener("input", e => {
   f(v);
   edAfter();
 });
-$("#eddialog").addEventListener("change", e => {
+$("#edpage").addEventListener("change", e => {
   if (e.target.tagName === "SELECT" || e.target.type === "range") ED.typing = false;
 });
 function edTrimTo(edge, abs) {
@@ -6790,14 +6932,26 @@ function edKeys(e) {
   if ((e.ctrlKey || e.metaKey) && k === "Enter") { e.preventDefault(); return edAct("edsave"); }
 }
 function edAct(a, d) {
-  if (!ED.data) { if (a === "edclose") $("#eddialog").close(); return; }
+  if (!ED.data) { if (a === "edclose") location.assign(pathFor("library")); return; }
   const v = $("#edvideo");
-  if (a === "edclose") return $("#eddialog").close();
+  if (a === "edclose") return location.assign(pathFor("library"));
   if (a === "edtab") {
-    $$("#eddialog [data-pane]").forEach(x => { x.hidden = x.dataset.pane !== d.k; });
-    $$("#eddialog .ed3-tabs button").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.k === d.k)));
+    $$("#edpage [data-pane]").forEach(x => { x.hidden = x.dataset.pane !== d.k; });
+    $$("#edpage .edp-tabs button").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.k === d.k)));
     return;
   }
+  if (a === "edskipstart") return edSeek(Number(edVal("start")));
+  if (a === "edskipend") return edSeek(Number(edVal("end")));
+  if (a === "edstep") return edSeek(edAt() + Number(d.d || 0) * 0.1);
+  if (a === "edfit") { ED.zoom = 1; ED.view = null; edTimeline(); edDraw(); return; }
+  if (a === "edfull") { const f = $("#edcanvas"); if (!document.fullscreenElement) f?.requestFullscreen?.(); else document.exitFullscreen(); return; }
+  if (a === "edsafe") {
+    ED.safe = !ED.safe;
+    const b = $("#edsafe"); if (b) { b.classList.toggle("on", ED.safe); b.setAttribute("aria-pressed", String(ED.safe)); }
+    return edDraw();
+  }
+  if (a === "edclipmenu") return edClipMenu();
+  if (a === "edpickclip") return openEditor(ED.jid, d.c);
   if (a === "edplay") {
     if (!v) return;
     if (v.paused) { if (v.currentTime + ED.data.video.start < Number(edVal("start"))) edSeek(Number(edVal("start"))); v.play().catch(() => {}); }
@@ -6810,6 +6964,21 @@ function edAct(a, d) {
   if (a === "edreset") { edPush(); ED.draft = {}; return edAfter(); }
   if (a === "edsave") return edSave();
 }
+function edClipMenu() {
+  const box = $("#edclipmenu"), btn = $(".edp-clip"); if (!box) return;
+  const job = jobOf(ED.jid), clips = (job?.clips || []).filter(c => c.status === "done");
+  box.innerHTML = clips.map(c => `<button type="button" class="${c.id === ED.cid ? "on" : ""}" data-act="edpickclip" data-c="${esc(c.id)}">
+      <img src="/media/${esc(ED.jid)}/${esc(c.cover)}?v=${c.version || 0}" alt="">
+      <span><b>${esc(edClipLabel(c))}</b><small>${fmt(c.end - c.start)}${c.score ? ` · score ${c.score}` : ""}</small></span></button>`).join("")
+    || `<p class="ed3-hint" style="padding:8px">No finished clips in this video.</p>`;
+  const was = !box.hidden;
+  box.hidden = was;
+  btn?.setAttribute("aria-expanded", String(!was));
+}
+document.addEventListener("click", e => {
+  const box = $("#edclipmenu");
+  if (box && !box.hidden && !e.target.closest("#edclipmenu, .edp-clip")) { box.hidden = true; $(".edp-clip")?.setAttribute("aria-expanded", "false"); }
+});
 async function edSave() {
   if (ED.saving || !ED.data) return;
   ED.saving = true;
@@ -7060,7 +7229,8 @@ document.addEventListener("click", async e => {
     if (a === "addmore") { const u = $("#url"); return u && !u.value ? (u.focus(), toast("Paste another link, or drop a file anywhere on the box.")) : $("#file").click(); }
     if (a === "closedlg") return $("#clipdlg").close();
     if (a === "openedit") { const cd = $("#clipdlg"); if (cd?.open) cd.close(); return openEditor(d.j, d.c); }
-    if (a.startsWith("ed") && ["edclose", "edtab", "edplay", "edmute", "edundo", "edredo", "edreset", "edsave"].includes(a)) return edAct(a, d);
+    if (a.startsWith("ed") && ["edclose", "edtab", "edplay", "edmute", "edundo", "edredo", "edreset", "edsave",
+        "edskipstart", "edskipend", "edstep", "edfit", "edfull", "edsafe", "edclipmenu", "edpickclip"].includes(a)) return edAct(a, d);
     if (a === "openclip") return openClip(d.j, d.c);
     if (a === "newcreator") {
       const dlg = $("#formdlg");
@@ -7534,6 +7704,8 @@ $("#main").addEventListener("scroll", () => $(".topbar").classList.toggle("stuck
   if (q.get("verify_error")) { history.replaceState(null, "", location.pathname); setTimeout(() => toast(q.get("verify_error"), "bad"), 300); }
   if (location.pathname.startsWith("/app/")) { const [v, tab] = fromPath(location.pathname); S.view = v; S.ctab = tab; }  // the address decides, before anything loads
   await tick();
+  const er = edRoute();
+  if (er) { await startEditorPage(er[0], er[1]); return; }        // the clip editor is a page of its own
   { const [v, tab] = location.pathname.startsWith("/app/") ? fromPath(location.pathname) : ["overview", "clips"]; go(v, tab, true); remember(S.view, S.ctab, "replace"); }
   try {  // a link pasted on the home page before signing up
     const link = sessionStorage.getItem("peakcut_link");
