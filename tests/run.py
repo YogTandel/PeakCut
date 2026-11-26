@@ -106,6 +106,7 @@ def main() -> int:
                 ("YouTube keeps working when it refuses this server", ["tests/test_youtube_routes.py"]),
                 ("cancelling a video while it is being made", ["tests/test_cancel.py"]),
                 ("the clip editor: what it is handed, and the look it may change", ["tests/test_editor.py"]),
+                ("a clip's captions as an .srt file", ["tests/test_captions.py"]),
                 ("the speech machine starts fresh when its memory fills", ["tests/test_asr_worker.py"]),
                 ("the AI hears each decided clip (Gemini only); chat speed on Kick too", ["tests/test_listen.py"]),
                 ("live recording gets past the opening ad, and says when it is stuck", ["tests/test_live_recovery.py"]),

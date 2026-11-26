@@ -503,6 +503,22 @@ def clip_source_file(jid, cid) -> Path:
                      "Add the video again to make new clips from it.")
 
 
+def clip_captions(jid, cid) -> str:
+    """A made clip's captions as SubRip (.srt), read from the caption file the renderer wrote next to the video.
+    What is on the video is what comes out: the same words, the same moments."""
+    job = _jobs[jid]
+    clip = next(c for c in job["clips"] if c["id"] == cid)
+    if clip.get("status") != "done" or not clip.get("file"):
+        raise ValueError("This clip hasn't been made yet, so it has no captions to download.")
+    ass = Path(job["dir"]) / "clips" / f"{clip['id']}.ass"
+    if not ass.is_file():
+        raise ValueError("This clip's caption file is gone. Make the clip again to get one.")
+    text = render.ass_to_srt(ass.read_text(encoding="utf-8", errors="replace"))
+    if not text:
+        raise ValueError("This clip has no captions: it was made with captions turned off.")
+    return text
+
+
 def editor_state(jid, cid) -> dict:
     """Everything the clip editor needs: the clip, its look, the words under it, and where its picture comes from.
     Times are seconds on the whole video, as the rest of the app uses them; `words` are on the clip (0 is its start),

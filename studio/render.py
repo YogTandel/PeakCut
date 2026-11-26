@@ -472,6 +472,69 @@ PIP_W = 380            # how wide the facecam is in the 1080-wide frame (the gam
 PIP_MARGIN = 26
 
 
+_ASS_TAG = re.compile(r"\{[^}]*\}")
+
+
+def _ass_seconds(t: str) -> float:
+    h, m, sec = t.strip().split(":")
+    return int(h) * 3600 + int(m) * 60 + float(sec)
+
+
+def _srt_time(t: float) -> str:
+    ms = max(0, int(round(t * 1000)))
+    h, ms = divmod(ms, 3600000)
+    m, ms = divmod(ms, 60000)
+    s, ms = divmod(ms, 1000)
+    return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
+
+
+def ass_to_srt(ass: str) -> str:
+    """The captions of a made clip as SubRip text: one cue per caption line, with the words and the moments that are
+    on the picture. The heading, a campaign's fixed line and the drawn boxes are left out.
+
+    The renderer writes a caption line as several events: each word has one while it waits and one while it is said
+    (and a "fill" style repeats the whole line). Events are put back into lines by their timing and by the place each
+    word is drawn at, so a word said twice keeps both."""
+    events = []
+    for line in (ass or "").splitlines():
+        if not line.startswith("Dialogue:"):
+            continue
+        parts = line.split(",", 9)
+        if len(parts) != 10:
+            continue
+        start, end, style, text = parts[1], parts[2], parts[3].strip(), parts[9]
+        if style != "Cap" or "\\p1" in text:                 # the caption style only; not the boxes drawn with it
+            continue
+        body = _ASS_TAG.sub("", text).replace("\\N", "\n").replace("\\n", "\n").replace("\\h", " ").strip()
+        if not body:
+            continue
+        try:
+            a, b = _ass_seconds(start), _ass_seconds(end)
+        except ValueError:
+            continue
+        if b <= a:
+            continue
+        at = re.search(r"\\pos\((-?\d+(?:\.\d+)?),", text)
+        events.append((a, b, body, at.group(1) if at else ""))
+
+    cues = []                                              # [start, end, text, {(word, place)}, last word, last place]
+    for a, b, body, at in events:
+        last = cues[-1] if cues else None
+        if last and body == last[4] and at == last[5] and a <= last[1] + 0.01:
+            last[1] = max(last[1], b)                       # the same words, the next moment: the line goes on
+            continue
+        if last and a < last[1] - 0.02:                     # another word of the line on screen
+            if (body, at) not in last[3]:
+                last[2] = (last[2] + " " + body).strip()
+                last[3].add((body, at))
+            last[4], last[5] = body, at
+            last[1] = max(last[1], b)
+        else:
+            cues.append([a, b, body, {(body, at)}, body, at])
+    return "\n".join(f"{n}\n{_srt_time(a)} --> {_srt_time(b)}\n{body}\n"
+                     for n, (a, b, body, *_rest) in enumerate(cues, 1))
+
+
 def _filter(layout, fg_h, facecam=None):
     if layout == "gameplay" and facecam:
         # The game fills the screen, and the webcam sits in the top corner of it, so a viewer sees

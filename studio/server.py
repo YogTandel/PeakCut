@@ -1289,6 +1289,21 @@ def clip_editor(jid: str, cid: str):
         raise HTTPException(409, str(e))
 
 
+@app.get("/api/jobs/{jid}/clips/{cid}/captions")
+def clip_captions(jid: str, cid: str):
+    """The clip's captions as a SubRip file (.srt), for an editor, a player or a platform that asks for one."""
+    job, clip = _clip_or_404(jid, cid)
+    try:
+        text = jobs.clip_captions(jid, cid)
+    except ValueError as e:
+        raise HTTPException(404, str(e))
+    name = account.clip_title_name(clip, cid) + ".srt"
+    ascii_name = "".join(ch for ch in name if ch.isascii() and ch.isprintable() and ch not in '"\\') or f"{cid}.srt"
+    return Response(text, media_type="application/x-subrip; charset=utf-8",
+                    headers={"Content-Disposition": f"attachment; filename=\"{ascii_name}\"; filename*=UTF-8''{quote(name)}",
+                             "Cache-Control": "private, no-store"})
+
+
 @app.get("/api/jobs/{jid}/clips/{cid}/source")
 def clip_source(jid: str, cid: str):
     """The video the clip is cut from, so the editor can show it. Ranges are honoured, so seeking is cheap."""
