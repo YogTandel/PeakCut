@@ -28,7 +28,8 @@ services:
     env_file: .env
     environment:
       DATABASE_URL: postgresql+psycopg://peakcut:${POSTGRES_PASSWORD}@db:5432/peakcut
-      PEAKCUT_PUBLIC_URL: https://${PEAKCUT_DOMAIN:?set PEAKCUT_DOMAIN in .env}
+      # https://<your domain> on a server; on your own machine http://127.0.0.1:8765
+      PEAKCUT_PUBLIC_URL: ${PEAKCUT_PUBLIC_URL:-https://${PEAKCUT_DOMAIN:?set PEAKCUT_DOMAIN in .env}}
       # On a server everyone signs in. Set PEAKCUT_ACCOUNTS=0 in .env only if the site is private to you.
       PEAKCUT_ACCOUNTS: ${PEAKCUT_ACCOUNTS:-1}
       # 1 when the recorder service below runs (COMPOSE_PROFILES=recorder): live recordings then happen there

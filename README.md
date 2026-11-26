@@ -69,6 +69,35 @@ The first start downloads the speech model by itself (about 480 MB, once).
 Open http://127.0.0.1:8765. There is no sign-in: it opens straight into the dashboard. Open the **AI** page (the AI card at the bottom of the sidebar), choose
 your AI service, paste your key and press **Save and test** (see [Choose your AI](#choose-your-ai)).
 
+### With Docker instead
+
+The same settings run on your own computer in Docker, using `docker-compose.yml` with no domain and no web server in
+front. Docker must be running (Docker Desktop, Kiri, Podman with the Docker API, or Docker in WSL).
+
+```bash
+cat > .env <<EOF
+PEAKCUT_DOMAIN=localhost
+POSTGRES_PASSWORD=$(python -c "import secrets;print(secrets.token_urlsafe(24))")
+PEAKCUT_ACCOUNTS=0
+PEAKCUT_PUBLIC_URL=http://127.0.0.1:8765
+EOF
+docker compose up -d --build
+```
+
+Open http://127.0.0.1:8765. Everything PeakCut keeps (videos, clips, the database, the speech model) lives in the
+`data` and `pgdata` Docker volumes; with Kiri or Docker Desktop those volumes sit inside the engine's disk image,
+so keep that image on the drive with room (`D:` here). To put the media in an ordinary folder instead, add
+
+```yaml
+# docker-compose.override.yml
+services:
+  app:
+    volumes:
+      - D:/PeakCut/data:/data
+```
+
+and run `docker compose up -d`. Logs: `docker compose logs -f app`. Updates: `git pull && docker compose up -d --build`.
+
 ## Choose your AI
 
 PeakCut needs a chat model that can return JSON. The easy way is in the dashboard: the **AI** page. Pick the
