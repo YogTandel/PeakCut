@@ -630,6 +630,7 @@ a.ai-link{text-decoration:none}
 .danger-card h2{color:var(--bad)}
 .clip-foot{display:flex;gap:2px;align-items:center;margin-top:auto;padding-top:8px;min-width:0}
 .clip-foot .btn.icon{width:30px;height:30px;padding:0;flex:none}.clip-foot .btn:not(.icon){height:30px;padding:0 10px;flex:none;font-size:13px}.clip-foot .btn:not(.icon) svg{width:14px;height:14px}
+@media (max-width:640px){.clip-foot{gap:0;flex-wrap:wrap;row-gap:3px}.clip-foot .btn.icon{width:22px;height:22px}.clip-foot .btn.icon svg{width:14px;height:14px}.clip-foot .selck{width:20px;height:20px}.clip-foot .selck input{width:14px;height:14px}}
 .clip{min-width:0}
 
 /* ---------- live */
@@ -4168,7 +4169,7 @@ function clipHtml(j, c) {
         <button class="btn sm icon ghost" data-act="copy" ${a} title="Copy post text" aria-label="Copy post text">${ic("copy")}</button>
         ${busyClip ? "" : `<button class="btn sm icon ghost" data-act="delclip" ${a} title="Delete this clip" aria-label="Delete this clip">${ic("trash")}</button>`}
         <span class="grow"></span>
-        ${c.status === "done" ? `<button class="btn sm${Object.values(c.posts || {}).some(p => p.status !== "cancelled") ? "" : " primary"}" data-act="openclip" ${a}>${ic("send")}Post</button>` : ""}
+        ${c.status === "done" ? `<button class="btn sm icon${Object.values(c.posts || {}).some(p => p.status !== "cancelled") ? "" : " primary"}" data-act="openclip" ${a} title="Post this clip" aria-label="Post this clip">${ic("send")}</button>` : ""}
       </div>
     </div></article>`;
 }
