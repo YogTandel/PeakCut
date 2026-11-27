@@ -104,6 +104,20 @@ r = c.get("/api/speech").json()["models"]
 check("the page lists both languages with their size", [(m["lang"], m["state"], m["size_mb"] > 0) for m in r],
       [("en", "missing", True), ("ar", "missing", True)])
 check("an unknown language is refused", c.post("/api/speech/xx", headers=ORIGIN).status_code, 400)
+
+# ---- the ElevenLabs key, saved from the page (not only .env)
+check("the cloud key starts off", c.get("/api/speech").json()["cloud"]["on"], False)
+put = c.put("/api/speech/cloud", json={"key": "xi-test-key-12345678"}, headers=ORIGIN)
+saved = put.json()["cloud"]
+check("a saved ElevenLabs key turns the cloud on",
+      (put.status_code, saved["on"], saved["key_hint"], saved["saved_here"]), (200, True, "5678", True))
+check("the key itself is never sent back", "xi-test-key" in put.text, False)
+check("every language is ready while the cloud listens", c.get("/api/status").json()["speech"]["ar"]["state"], "ready")
+check("another website cannot save a key",
+      c.put("/api/speech/cloud", json={"key": "x"}, headers={"Origin": "https://evil.example"}).status_code, 403)
+check("removing the key switches back",
+      (c.delete("/api/speech/cloud/key", headers=ORIGIN).json()["cloud"]["on"],
+       c.get("/api/status").json()["speech"]["ar"]["state"]), (False, "missing"))
 check("another website cannot start a download", c.post("/api/speech/ar", headers={"Origin": "https://evil.example"}).status_code, 403)
 check("...and nothing was downloaded", downloads, [])
 tampered.add("ar")         # the file at the address was changed: it must not be unpacked

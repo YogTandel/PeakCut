@@ -147,7 +147,8 @@ back into English. Captions on the clips are in English.
 ### Speech in the cloud (optional)
 
 The transcript is written on this machine by default (see the speech models above). If you would rather use
-ElevenLabs' Scribe, set a key and it does the listening instead; the local model is then only the fallback:
+ElevenLabs' Scribe, paste a key in Settings → Speech models and press Save; it then does the listening and the local
+model is only the fallback. On a server the key can go in `.env` instead (a key saved in the page wins):
 
 ```ini
 PEAKCUT_ELEVENLABS_KEY=your-key-here

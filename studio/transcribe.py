@@ -5,6 +5,7 @@ been used for a while is put away to free the memory (English stays).
 It runs in one of two places. On this machine's processors (the default), or, when PEAKCUT_ASR_URL is set, on a
 separate machine with a graphics card (studio/asr_worker.py), which does the same work many times faster. If that
 machine cannot be reached, the pieces are done here instead, so transcription never stops because of it."""
+import json
 import os
 import queue
 import re
@@ -80,18 +81,83 @@ _remote_down_until = 0.0
 _remote_lacks: dict = {}       # language -> until when: the card's machine has no model for it, so it is done here
 
 
-# ElevenLabs' Scribe, when a key is set (PEAKCUT_ELEVENLABS_KEY): it writes the transcript and the local model is
-# only the fallback. The audio leaves this machine and ElevenLabs bills for each minute, so it is off by default.
-CLOUD = bool(config.ELEVENLABS_KEY)
+# ElevenLabs' Scribe, when a key is set: it writes the transcript and the local model is only the fallback. The key
+# is the one saved in Settings -> Speech models, else the one in .env. The audio leaves this machine and ElevenLabs
+# bills for each minute, so it is off until a key is given.
 CLOUD_MODEL = config.ELEVENLABS_MODEL
 CLOUD_LATEST = "scribe_v3"          # what ElevenLabs lists for recorded audio; used when the configured id is gone
 CLOUD_MODEL_USED = ""               # the id that last answered (a configured old one may have been replaced)
 CLOUD_WORKERS = config.ELEVENLABS_WORKERS
 CLOUD_URL = "https://api.elevenlabs.io/v1/speech-to-text"
 
+_cloud_lock = threading.Lock()
+_cloud_at = None                    # when speech.json was last read, so it is read again only when it changes
+_cloud_saved: dict = {}
+
+
+def _cloud_file():
+    return config.DATA_DIR / "speech.json"
+
+
+def _cloud_settings() -> dict:
+    """The key saved from the dashboard, read again only when the file changes."""
+    global _cloud_at, _cloud_saved
+    f = _cloud_file()
+    try:
+        at = f.stat().st_mtime_ns
+    except OSError:
+        at = 0
+    if at != _cloud_at:
+        try:
+            data = json.loads(f.read_text(encoding="utf-8")) if at else {}
+        except (OSError, ValueError):
+            data = {}
+        _cloud_saved = data if isinstance(data, dict) else {}
+        _cloud_at = at
+    return _cloud_saved
+
+
+def cloud_key() -> str:
+    """The key in use. A key saved from the dashboard wins, and one saved as empty keeps ElevenLabs off even when
+    .env has a key: removing it has to actually remove it."""
+    d = _cloud_settings()
+    return str(d["elevenlabs_key"]) if "elevenlabs_key" in d else config.ELEVENLABS_KEY
+
+
+def listening() -> bool:
+    return bool(cloud_key())
+
+
+def cloud_public() -> dict:
+    """What the settings page may see. The key itself never leaves the server: only whether there is one, the last
+    four characters, and whether it came from .env."""
+    d = _cloud_settings()
+    k = cloud_key()
+    return {"on": bool(k), "model": (CLOUD_MODEL_USED or CLOUD_MODEL) if k else "",
+            "has_key": bool(k), "key_hint": k[-4:] if len(k) >= 12 else "",
+            "saved_here": "elevenlabs_key" in d and bool(k),
+            "from_env": "elevenlabs_key" not in d and bool(config.ELEVENLABS_KEY)}
+
+
+def save_cloud_key(key: str) -> dict:
+    """Save the key from Settings -> Speech models. An empty key turns ElevenLabs off (also when .env has one)."""
+    k = str(key or "").strip()[:400]
+    with _cloud_lock:
+        f = _cloud_file()
+        tmp = f.with_suffix(".tmp")
+        tmp.write_text(json.dumps({"elevenlabs_key": k}), encoding="utf-8")
+        try:
+            os.chmod(tmp, 0o600)        # the key is only for whoever runs the server
+        except OSError:
+            pass
+        tmp.replace(f)
+        global _cloud_at
+        _cloud_at = None
+    return cloud_public()
+
 
 def model_ready(lang: str = fetch_model.DEFAULT) -> bool:
-    return CLOUD or fetch_model.ready(lang)
+    return listening() or fetch_model.ready(lang)
 
 
 def _cloud_detail(r) -> str:
@@ -119,11 +185,12 @@ def _model_gone(r) -> bool:
                                                      "not available", "unavailable", "invalid", "deprecated", "retired"))
 
 
-def _cloud_piece(seg: np.ndarray, lang: str, at: int) -> list:
+def _cloud_piece(seg: np.ndarray, lang: str, at: int, key: str = "") -> list:
     """One stretch of sound written down by ElevenLabs, as [{'w','s','e'}] on the whole video's clock. The audio goes
     as raw 16-bit little-endian mono at 16 kHz, which is what it already is, so nothing is encoded on the way.
     If ElevenLabs has retired the configured model id, the current one (scribe_v3) is tried once."""
     global CLOUD_MODEL_USED
+    key = key or cloud_key()
     pcm = np.clip(seg * 32768.0, -32768, 32767).astype("<i2").tobytes()
     if fetch_model.known(lang):
         lang_code = lang.split("-")[0]
@@ -137,7 +204,7 @@ def _cloud_piece(seg: np.ndarray, lang: str, at: int) -> list:
             form["language_code"] = lang_code
         for attempt in (1, 2):
             r = httpx.post(CLOUD_URL, data=form, files={"file": ("piece.pcm", pcm, "application/octet-stream")},
-                           headers={"xi-api-key": config.ELEVENLABS_KEY},
+                           headers={"xi-api-key": key},
                            timeout=httpx.Timeout(240, connect=15))
             if r.status_code in (429, 500, 502, 503, 504) and attempt == 1:
                 time.sleep(2)
@@ -186,10 +253,11 @@ def _cloud_all(todo: list, on_progress, lang: str) -> list:
         return []
     done = [0]
     lock = threading.Lock()
+    key = cloud_key()
 
     def one(item):
         a, b, seg = item
-        got = _cloud_piece(seg, lang, a)
+        got = _cloud_piece(seg, lang, a, key)
         with lock:
             done[0] += 1
             if on_progress:
@@ -455,7 +523,7 @@ def transcribe(audio: np.ndarray, on_progress=None, lang: str = fetch_model.DEFA
         if len(seg) < 4800 or float(np.sqrt((seg ** 2).mean())) < 0.003:
             continue  # silence: skip, saves time and avoids made-up words
         todo.append((a, b, seg))
-    if CLOUD:
+    if listening():
         try:
             return _cloud_all(todo, on_progress, lang)
         except Exception as e:  # noqa: BLE001 - the local model, or the card's machine, still writes it down

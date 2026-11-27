@@ -39,7 +39,7 @@ are there, and only then offer to delete the old folder. Never delete anything w
 | `studio/usage.py` | The record of AI calls and tokens shown on the AI usage page |
 | `studio/jobs.py` | The video pipeline and the fair queue |
 | `studio/live.py` | Live recording and clipping |
-| `studio/transcribe.py`, `studio/asr_worker.py` | Speech to text, here or on a second machine, one model per spoken language |
+| `studio/transcribe.py`, `studio/asr_worker.py` | Speech to text, here or on a second machine, one model per spoken language; the optional ElevenLabs key, saved in `speech.json` in the data folder |
 | `studio/fetch_model.py` | The speech models (`MODELS`: one row per spoken language) and downloading them |
 | `tools/export_arabic_model.py` | How the Arabic model was converted for sherpa-onnx (run once, on Google Colab) |
 | `studio/render.py` | Cutting, layouts and captions (ffmpeg and Pillow) |

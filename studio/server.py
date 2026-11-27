@@ -97,7 +97,7 @@ def _startup():
     render.install_fonts()
     if _tools.missing():
         print("\n  " + _tools.HELP + "\n", flush=True)
-    if not transcribe.REMOTE and not transcribe.CLOUD and config.env("PEAKCUT_FETCH_MODEL", "1") != "0":     # the speech model: fetched now, in the background, if it was never downloaded
+    if not transcribe.REMOTE and not transcribe.listening() and config.env("PEAKCUT_FETCH_MODEL", "1") != "0":     # the speech model: fetched now, in the background, if it was never downloaded
         from . import fetch_model
         threading.Thread(target=lambda: _quiet(fetch_model.ensure), daemon=True).start()
     jobs.start()
@@ -773,8 +773,8 @@ def _speech_brief() -> dict:
     """Which spoken languages can be transcribed here: for the language choice when adding a video. With ElevenLabs
     doing the listening, every language PeakCut knows is ready even when its local model was never downloaded."""
     from . import fetch_model
-    return {k: {"label": m[0], "size_mb": m[3], "state": "ready" if transcribe.CLOUD else fetch_model.status(k),
-                "cloud": bool(transcribe.CLOUD)} for k, m in fetch_model.MODELS.items()}
+    return {k: {"label": m[0], "size_mb": m[3], "state": "ready" if transcribe.listening() else fetch_model.status(k),
+                "cloud": transcribe.listening()} for k, m in fetch_model.MODELS.items()}
 
 
 def _ask_rating() -> bool:
@@ -2295,8 +2295,29 @@ def speech_list(request: Request):
     return {"models": [{"lang": k, "label": m[0], "size_mb": m[3], "credit": m[4], "state": fetch_model.status(k),
                         "percent": fetch_model.state[k]["percent"], "error": fetch_model.state[k]["error"],
                         "default": k == fetch_model.DEFAULT} for k, m in fetch_model.MODELS.items()],
-            "cloud": {"on": bool(transcribe.CLOUD),
-                      "model": (transcribe.CLOUD_MODEL_USED or transcribe.CLOUD_MODEL) if transcribe.CLOUD else ""}}
+            "cloud": transcribe.cloud_public()}
+
+
+@app.put("/api/speech/cloud")
+def speech_cloud_save(request: Request, body: dict = Body(...)):
+    _admin(request)
+    try:
+        transcribe.save_cloud_key(body.get("key") or "")
+    except OSError:
+        raise HTTPException(500, "The key could not be saved. Check that PeakCut's folder is writable.")
+    ctx.bump()
+    return speech_list(request)
+
+
+@app.delete("/api/speech/cloud/key")
+def speech_cloud_remove(request: Request):
+    _admin(request)
+    try:
+        transcribe.save_cloud_key("")
+    except OSError:
+        raise HTTPException(500, "The key could not be removed. Check that PeakCut's folder is writable.")
+    ctx.bump()
+    return speech_list(request)
 
 
 @app.post("/api/speech/{lang}")

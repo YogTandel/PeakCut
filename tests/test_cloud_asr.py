@@ -54,7 +54,7 @@ fake_post.gone = None
 transcribe.httpx.post = fake_post
 seg = np.full(16000, 0.1, dtype=np.float32)
 
-check("a key turns the cloud model on", transcribe.CLOUD and transcribe.model_ready("en"))
+check("a key turns the cloud model on", transcribe.listening() and transcribe.model_ready("en"))
 transcribe.fetch_model.ready = lambda lang=None: False          # no local model in this empty folder
 check("with no local model, a language still counts as ready", transcribe.model_ready("ar"))
 
@@ -102,7 +102,7 @@ check("a refused key says what ElevenLabs answered", "HTTP 401" in why and "bad 
 
 # A video: the cloud fails, and there is no local model to fall back on: the error names the service and the way out.
 noise = (np.random.default_rng(3).integers(-6000, 6000, 32000)).astype("<i2")
-transcribe.CLOUD = True
+transcribe.save_cloud_key("test-key-12345678")
 try:
     transcribe.transcribe(noise, None, "en")
     why = ""
@@ -111,10 +111,17 @@ except RuntimeError as e:
 check("a failed cloud with no local model explains itself",
       "ElevenLabs couldn't write down this video" in why and "HTTP 401" in why and "Speech models" in why, why)
 
+# The key saved in the dashboard wins over .env, and saving an empty one turns it off even when .env has a key.
 fake_post.status = 200
-transcribe.CLOUD = False
-check("with the key off, the local models are the only ones used", not transcribe.CLOUD and not transcribe.model_ready("en"))
-transcribe.CLOUD = True
+transcribe.save_cloud_key("saved-key-99999999")
+check("a key saved in the dashboard is the one used", transcribe.cloud_key() == "saved-key-99999999" and transcribe.listening())
+pub = transcribe.cloud_public()
+check("the settings page sees only the last four characters",
+      pub["key_hint"] == "9999" and pub["saved_here"] and "saved-key" not in json.dumps(pub), str(pub))
+transcribe.save_cloud_key("")
+check("with the key off, the local models are the only ones used", not transcribe.listening() and not transcribe.model_ready("en"))
+transcribe._cloud_file().unlink()
+check(".env still works when nothing is saved", transcribe.listening() and transcribe.cloud_key() == "test-key-12345678")
 
 print("ALL PASSED" if not fails else f"{len(fails)} failed")
 shutil.rmtree(os.environ["PEAKCUT_DATA"], ignore_errors=True)
