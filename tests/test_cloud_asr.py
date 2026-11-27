@@ -36,6 +36,8 @@ seen = []
 
 def fake_post(url, data=None, files=None, headers=None, timeout=None, **_k):
     seen.append({"url": url, "data": data, "files": files, "headers": headers})
+    if fake_post.gone and (data or {}).get("model_id") == fake_post.gone:
+        return Reply(400, {"detail": {"message": f"model {fake_post.gone} is not available"}})
     if fake_post.status != 200:
         return Reply(fake_post.status, {"detail": {"message": "bad key"}})
     return Reply(200, {"words": [
@@ -48,6 +50,7 @@ def fake_post(url, data=None, files=None, headers=None, timeout=None, **_k):
 
 
 fake_post.status = 200
+fake_post.gone = None
 transcribe.httpx.post = fake_post
 seg = np.full(16000, 0.1, dtype=np.float32)
 
@@ -62,7 +65,7 @@ check("the request is ElevenLabs' speech-to-text", seen[0]["url"] == "https://ap
 check("the key goes in the xi-api-key header", seen[0]["headers"].get("xi-api-key") == "test-key-12345678")
 check("word timestamps and raw 16 kHz sound are asked for",
       (seen[0]["data"]["timestamps_granularity"], seen[0]["data"]["file_format"], seen[0]["data"]["model_id"],
-       seen[0]["data"]["language_code"]) == ("word", "pcm_s16le_16", "scribe_v2", "en"), str(seen[0]["data"]))
+       seen[0]["data"]["language_code"]) == ("word", "pcm_s16le_16", "scribe_v3", "en"), str(seen[0]["data"]))
 check("the sound is sent as 16-bit little-endian mono, not encoded",
       seen[0]["files"]["file"][1] == np.clip(seg * 32768.0, -32768, 32767).astype("<i2").tobytes())
 
@@ -76,6 +79,17 @@ settled = transcribe._settle([{"w": "a", "s": 0.0, "e": 0.2}, {"w": "a", "s": 0.
                               {"w": "b", "s": 0.5, "e": 0.6}, {"w": "c", "s": 0.7, "e": 0.8}])
 check("the same word at the same moment is said once", [w["w"] for w in settled] == ["a", "b", "c"])
 check("a word lasts until the next one starts", settled[1]["e"] == 0.7, str(settled))
+
+# An id ElevenLabs has retired is replaced by the current model, once.
+transcribe.CLOUD_MODEL = "scribe_v2"
+fake_post.gone = "scribe_v2"
+seen.clear()
+words = transcribe._cloud_piece(seg, "en", 0)
+check("a retired model id is asked again with the current Scribe",
+      [x["data"]["model_id"] for x in seen] == ["scribe_v2", "scribe_v3"] and words[0]["w"] == "hello", str(seen))
+check("the model that answered is remembered", transcribe.CLOUD_MODEL_USED == "scribe_v3")
+fake_post.gone = None
+transcribe.CLOUD_MODEL = "scribe_v3"
 
 fake_post.status = 401
 seen.clear()

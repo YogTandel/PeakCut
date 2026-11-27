@@ -242,7 +242,7 @@ def ai_ready() -> bool:
 # ElevenLabs' Scribe writes the transcript instead of the local model, which is then only the fallback. It is billed
 # by ElevenLabs for each minute sent, and the audio leaves this machine. Off unless a key is set.
 ELEVENLABS_KEY = _secret("PEAKCUT_ELEVENLABS_KEY", "PEAKCUT_ELEVENLABS_KEY_FILE", r"\S{8,}")
-ELEVENLABS_MODEL = env("PEAKCUT_ELEVENLABS_MODEL", "scribe_v2").strip() or "scribe_v2"
+ELEVENLABS_MODEL = env("PEAKCUT_ELEVENLABS_MODEL", "scribe_v3").strip() or "scribe_v3"
 ELEVENLABS_WORKERS = max(1, min(6, int(env("PEAKCUT_ELEVENLABS_WORKERS") or 3)))      # pieces sent at once
 
 

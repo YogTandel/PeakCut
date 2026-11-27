@@ -2295,7 +2295,8 @@ def speech_list(request: Request):
     return {"models": [{"lang": k, "label": m[0], "size_mb": m[3], "credit": m[4], "state": fetch_model.status(k),
                         "percent": fetch_model.state[k]["percent"], "error": fetch_model.state[k]["error"],
                         "default": k == fetch_model.DEFAULT} for k, m in fetch_model.MODELS.items()],
-            "cloud": {"on": bool(transcribe.CLOUD), "model": transcribe.CLOUD_MODEL if transcribe.CLOUD else ""}}
+            "cloud": {"on": bool(transcribe.CLOUD),
+                      "model": (transcribe.CLOUD_MODEL_USED or transcribe.CLOUD_MODEL) if transcribe.CLOUD else ""}}
 
 
 @app.post("/api/speech/{lang}")

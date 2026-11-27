@@ -151,10 +151,11 @@ ElevenLabs' Scribe, set a key and it does the listening instead; the local model
 
 ```ini
 PEAKCUT_ELEVENLABS_KEY=your-key-here
-# PEAKCUT_ELEVENLABS_MODEL=scribe_v2      # whatever the speech-to-text page lists
+# PEAKCUT_ELEVENLABS_MODEL=scribe_v3      # the current recording model; an older id is replaced by it
 ```
 
-The sound of each video is sent to ElevenLabs and is billed by them per minute; nothing is sent when no key is set.
+Scribe v3 is the model used (an older id is replaced by it if ElevenLabs has retired that one). The sound of
+each video is sent to ElevenLabs and is billed by them per minute; nothing is sent when no key is set.
 Each 12–24 second stretch is sent with word timestamps, and if ElevenLabs cannot answer the local model writes that
 video instead. Settings → Speech models shows which one is doing the work.
 

@@ -84,6 +84,8 @@ _remote_lacks: dict = {}       # language -> until when: the card's machine has 
 # only the fallback. The audio leaves this machine and ElevenLabs bills for each minute, so it is off by default.
 CLOUD = bool(config.ELEVENLABS_KEY)
 CLOUD_MODEL = config.ELEVENLABS_MODEL
+CLOUD_LATEST = "scribe_v3"          # what ElevenLabs lists for recorded audio; used when the configured id is gone
+CLOUD_MODEL_USED = ""               # the id that last answered (a configured old one may have been replaced)
 CLOUD_WORKERS = config.ELEVENLABS_WORKERS
 CLOUD_URL = "https://api.elevenlabs.io/v1/speech-to-text"
 
@@ -92,30 +94,64 @@ def model_ready(lang: str = fetch_model.DEFAULT) -> bool:
     return CLOUD or fetch_model.ready(lang)
 
 
+def _cloud_detail(r) -> str:
+    """What ElevenLabs said went wrong, short enough for a message."""
+    try:
+        body = r.json()
+    except ValueError:
+        return (r.text or "")[:160]
+    if isinstance(body, dict):
+        detail = body.get("detail")
+        if isinstance(detail, dict):
+            return str(detail.get("message") or detail)[:160]
+        if detail:
+            return str(detail)[:160]
+    return ""
+
+
+def _model_gone(r) -> bool:
+    """ElevenLabs no longer knows the model we asked for (an old id retired under us), rather than a key or audio
+    problem: only then is it worth asking again with the current model."""
+    if r.status_code not in (400, 404, 422):
+        return False
+    why = (_cloud_detail(r) + " " + (r.text or "")).lower()
+    return "model" in why and any(t in why for t in ("not found", "not_found", "unknown", "does not exist",
+                                                     "not available", "unavailable", "invalid", "deprecated", "retired"))
+
+
 def _cloud_piece(seg: np.ndarray, lang: str, at: int) -> list:
     """One stretch of sound written down by ElevenLabs, as [{'w','s','e'}] on the whole video's clock. The audio goes
-    as raw 16-bit little-endian mono at 16 kHz, which is what it already is, so nothing is encoded on the way."""
+    as raw 16-bit little-endian mono at 16 kHz, which is what it already is, so nothing is encoded on the way.
+    If ElevenLabs has retired the configured model id, the current one (scribe_v3) is tried once."""
+    global CLOUD_MODEL_USED
     pcm = np.clip(seg * 32768.0, -32768, 32767).astype("<i2").tobytes()
-    form = {"model_id": CLOUD_MODEL, "timestamps_granularity": "word", "file_format": "pcm_s16le_16"}
     if fetch_model.known(lang):
-        form["language_code"] = lang.split("-")[0]
+        lang_code = lang.split("-")[0]
+    else:
+        lang_code = ""
     last = None
-    for attempt in (1, 2):
-        r = httpx.post(CLOUD_URL, data=form, files={"file": ("piece.pcm", pcm, "application/octet-stream")},
-                       headers={"xi-api-key": config.ELEVENLABS_KEY},
-                       timeout=httpx.Timeout(240, connect=15))
-        if r.status_code in (429, 500, 502, 503, 504) and attempt == 1:
-            time.sleep(2)
-            continue
-        last = r
+    models = [CLOUD_MODEL] + ([CLOUD_LATEST] if CLOUD_MODEL != CLOUD_LATEST else [])
+    for model in models:
+        form = {"model_id": model, "timestamps_granularity": "word", "file_format": "pcm_s16le_16"}
+        if lang_code:
+            form["language_code"] = lang_code
+        for attempt in (1, 2):
+            r = httpx.post(CLOUD_URL, data=form, files={"file": ("piece.pcm", pcm, "application/octet-stream")},
+                           headers={"xi-api-key": config.ELEVENLABS_KEY},
+                           timeout=httpx.Timeout(240, connect=15))
+            if r.status_code in (429, 500, 502, 503, 504) and attempt == 1:
+                time.sleep(2)
+                continue
+            last = r
+            break
+        if last.status_code == 200:
+            CLOUD_MODEL_USED = model
+            break
+        if model != models[-1] and _model_gone(last):
+            continue                      # an old id: ask again with the one ElevenLabs lists now
         break
     if last.status_code != 200:
-        detail = ""
-        try:
-            body = last.json()
-            detail = str((body.get("detail") or {}).get("message") or body.get("detail") or "")[:160] if isinstance(body, dict) else ""
-        except ValueError:
-            detail = (last.text or "")[:160]
+        detail = _cloud_detail(last)
         raise RuntimeError(f"ElevenLabs answered HTTP {last.status_code}{': ' + detail if detail else ''}")
     body = last.json()
     off = at / 16000.0
