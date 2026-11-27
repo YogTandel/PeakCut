@@ -770,9 +770,11 @@ def status(request: Request):
 
 
 def _speech_brief() -> dict:
-    """Which spoken languages can be transcribed here: for the language choice when adding a video."""
+    """Which spoken languages can be transcribed here: for the language choice when adding a video. With ElevenLabs
+    doing the listening, every language PeakCut knows is ready even when its local model was never downloaded."""
     from . import fetch_model
-    return {k: {"label": m[0], "size_mb": m[3], "state": fetch_model.status(k)} for k, m in fetch_model.MODELS.items()}
+    return {k: {"label": m[0], "size_mb": m[3], "state": "ready" if transcribe.CLOUD else fetch_model.status(k),
+                "cloud": bool(transcribe.CLOUD)} for k, m in fetch_model.MODELS.items()}
 
 
 def _ask_rating() -> bool:
