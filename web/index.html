@@ -6317,7 +6317,8 @@ function edGeo(look) {
   else hh = 1920;
   const top = Math.floor((1920 - hh) / 2);
   let hook, cap;
-  if (fills) { hook = 300; cap = 1380; }
+  if (layout === "podcast") { hook = 200; cap = 960; }            // the server follows the faces; the seam is the middle
+  else if (fills) { hook = 300; cap = 1380; }
   else if (layout === "split") { hook = 230; cap = 960; }
   else { hook = Math.max(230, top - 190); cap = Math.min(1640, top + hh + 180); }
   if (look.cap.y != null && look.cap.y !== "") cap = Math.round(1920 * Number(look.cap.y) / 100);
@@ -6452,6 +6453,7 @@ function edBuild() {
             <div class="edp-sec"><h4>Style</h4>
               <div class="ed3-row"><span>Template</span><select id="edtpl"><option value="">As it is now</option>${tpls}</select></div>
               <div class="ed3-row"><span>Layout</span><select id="edlay">${lays}</select></div>
+              <p class="ed3-hint" id="edpod" hidden>Podcast split follows the people in the frame when the clip is made; the preview stacks the two halves.</p>
               ${sw("edcaps", edCapsOn() && look.cap.show, "Captions on the video")}
             </div>
             <div class="edp-sec" style="margin-top:10px"><h4>Where they sit</h4>
@@ -6677,7 +6679,8 @@ function edDraw() {
     }
     if (lay === "blur" || lay === "zoom") edCover(ctx, v, 0, g.top * k, cv.width, g.h * k);
     else if (lay === "fit") edContain(ctx, v, 0, g.top * k, cv.width, g.h * k);
-    else if (lay === "split") {                       // both sides of the picture, one above the other
+    else if (lay === "split" || lay === "podcast") {   // both sides of the picture, one above the other (podcast:
+                                                       // the server picks who fills the frame; the preview stacks them)
       edCover(ctx, v, 0, 0, cv.width, cv.height / 2, "center", 0, .5);
       edCover(ctx, v, 0, cv.height / 2, cv.width, cv.height / 2, "center", .5, .5);
     }
@@ -6864,6 +6867,7 @@ function edSync() {
     const same = tplAll().find(fit);
     tpl.value = same ? same.id : "";
   }
+  const pod = $("#edpod"); if (pod) pod.hidden = look.layout !== "podcast";
   const u = $("#edundo"), r = $("#edredo"); if (u) u.disabled = !ED.undo.length; if (r) r.disabled = !ED.redo.length;
   edTimeline(); edMark(); edCheck();
 }
