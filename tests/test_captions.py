@@ -1,97 +1,111 @@
-"""Downloading a clip's captions: the .ass the renderer wrote becomes SubRip (.srt) with the words and moments
-that are on the picture, without the heading, the campaign's line or the boxes."""
+"""Check caption preferences and the subtitle events sent to the encoder."""
 import json
 import os
-import shutil
 import sys
 import tempfile
+from pathlib import Path
+from unittest.mock import patch
 
-os.environ["PEAKCUT_DATA"] = tempfile.mkdtemp(prefix="pc-srt-")
-os.environ["DATABASE_URL"] = ""
+from fastapi import HTTPException
+
 sys.path.insert(0, ".")
-from studio import auth, config, ctx, db, jobs, render  # noqa: E402
-
-db.init()
-fails = []
+WORDS = [{"w": "spoken", "s": 1.0, "e": 1.5}]
+FIXED = [{"w": "polished", "s": 1.0, "e": 1.5}]
 
 
-def check(name, ok, extra=""):
-    print(("PASS " if ok else "FAIL ") + name + (f"   {extra}" if extra and not ok else ""))
-    ok or fails.append(name)
+def check(name, condition):
+    if not condition:
+        raise AssertionError(name)
+    print(f"PASS {name}")
 
 
-ASS = r"""[Script Info]
-ScriptType: v4.00+
-PlayResX: 1080
-PlayResY: 1920
+def has_dialogue(ass, style, text=""):
+    return any(line.startswith("Dialogue: ") and f",{style}," in line and text in line
+               for line in ass.splitlines())
 
-[V4+ Styles]
-Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Cap,Poppins ExtraBold,132,&H00FFFFFF,&H00FFFFFF,&H00000000,&H70000000,0,0,0,0,100,100,0,0,1,7,0,5,0,0,0,1
-Style: Hook,Poppins ExtraBold,96,&H000E1014,&H000E1014,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0,0,5,0,0,0,1
-Style: Note,Poppins ExtraBold,46,&H00FFFFFF,&H00FFFFFF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,4,0,5,0,0,0,1
 
-[Events]
-Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
-Dialogue: 3,0:00:00.00,0:00:03.90,Hook,,0,0,0,,{\an7\pos(0,0)\fad(160,0)\c&HFFFFFF&\p1}m 10 10 l 300 10 300 200 10 200{\p0}
-Dialogue: 4,0:00:00.00,0:00:03.90,Hook,,0,0,0,,{\an5\pos(540,466)\fs96}WATCH THIS
-Dialogue: 4,0:00:00.00,0:00:03.90,Note,,0,0,0,,{\an5\pos(540,516)\fs46}follow for more
-Dialogue: 1,0:00:00.50,0:00:00.90,Cap,,0,0,0,,{\an5\pos(540,1444)\fs100}{\c&H00FFF000&}THIS {\c&H00FFFFFF&}IS
-Dialogue: 1,0:00:00.90,0:00:01.40,Cap,,0,0,0,,{\an5\pos(540,1444)\fs100}{\c&H00FFFFFF&}THIS {\c&H00FFF000&}IS
-Dialogue: 0,0:00:00.50,0:00:00.90,Cap,,0,0,0,,{\an7\pos(0,0)\bord0\shad0\c&H000000&\p1}m 0 0 l 400 0 400 300 0 300{\p0}
-Dialogue: 1,0:00:02.00,0:00:03.00,Cap,,0,0,0,,{\an5\pos(540,1444)\fs100}A\NTEST
-"""
-
-srt = render.ass_to_srt(ASS)
-expected = ("1\n00:00:00,500 --> 00:00:01,400\nTHIS IS\n\n"
-            "2\n00:00:02,000 --> 00:00:03,000\nA\nTEST\n")
-check("the words and their moments become one cue per line", srt == expected, repr(srt))
-check("the heading is not a caption", "WATCH THIS" not in srt)
-check("a campaign's fixed line is not a caption", "follow for more" not in srt)
-check("drawn boxes are skipped", "m 0 0" not in srt and "m 10 10" not in srt)
-WORDS = r"""Dialogue: 1,0:00:00.00,0:00:00.60,Cap,,0,0,0,,{\an5\pos(100,1444)\fs100\c&HFFFFFF&}NO
-Dialogue: 2,0:00:00.30,0:00:00.60,Cap,,0,0,0,,{\an5\pos(100,1444)\fs100\c&HFFF000&}NO
-Dialogue: 1,0:00:00.00,0:00:01.00,Cap,,0,0,0,,{\an5\pos(240,1444)\fs100\c&HFFFFFF&}NO
-Dialogue: 2,0:00:00.70,0:00:01.00,Cap,,0,0,0,,{\an5\pos(240,1444)\fs100\c&HFFF000&}NO
-Dialogue: 1,0:00:00.00,0:00:01.40,Cap,,0,0,0,,{\an5\pos(380,1444)\fs100\c&HFFFFFF&}WAY
-Dialogue: 1,0:00:01.40,0:00:02.20,Cap,,0,0,0,,{\an5\pos(160,1444)\fs100\c&HFFFFFF&}GO
-"""
-check("words waiting and being said become the line they are on, a repeated word kept",
-      render.ass_to_srt(WORDS) == ("1\n00:00:00,000 --> 00:00:01,400\nNO NO WAY\n\n"
-                                    "2\n00:00:01,400 --> 00:00:02,200\nGO\n"), repr(render.ass_to_srt(WORDS)))
-
-check("an empty caption file gives no cues", render.ass_to_srt("[Events]\nFormat: Layer\n") == "")
-check("a line that is only tags gives no cue",
-      render.ass_to_srt("Dialogue: 1,0:00:01.00,0:00:02.00,Cap,,0,0,0,,{\\an5\\pos(1,2)}   ") == "")
-
-u, _ = auth._create("srt@example.com", "Srt", password_hash="x")
-with ctx.as_user(u.id):
-    job = jobs.create({"type": "file", "name": "a video.mp4"}, {"captions": True}, enqueue=False)
-    d = config.user_dir(u.id) / "jobs" / job["id"]
-    (d / "clips").mkdir()
-    clip = {"id": "c1", "start": 0.0, "end": 5.0, "title": "My clip", "hook": "WATCH", "status": "done",
-            "version": 1, "file": "c1.mp4", "cover": "c1.jpg"}
-    job.update(status="done", clips=[clip])
-    jobs.save(job)
-    (d / "clips" / "c1.ass").write_text(ASS, encoding="utf-8")
-    got = jobs.clip_captions(job["id"], "c1")
-    check("a made clip hands over its captions", got == expected, repr(got))
-    (d / "clips" / "c1.ass").unlink()
+def rejects_caption_value(call):
     try:
-        jobs.clip_captions(job["id"], "c1")
-        why = ""
-    except ValueError as e:
-        why = str(e)
-    check("a clip whose caption file is gone says so", "caption file is gone" in why, why)
-    (d / "clips" / "c1.ass").write_text(ASS.split("[Events]")[0] + "[Events]\n", encoding="utf-8")
-    try:
-        jobs.clip_captions(job["id"], "c1")
-        why = ""
-    except ValueError as e:
-        why = str(e)
-    check("a clip with captions off says it has none", "captions turned off" in why, why)
+        call()
+    except HTTPException as error:
+        return error.status_code == 400 and "captions" in str(error.detail).lower()
+    return False
 
-print("ALL PASSED" if not fails else f"{len(fails)} failed")
-db.engine.dispose()
-shutil.rmtree(os.environ["PEAKCUT_DATA"], ignore_errors=True)
-sys.exit(1 if fails else 0)
+
+def main(data):
+    os.environ.update(PEAKCUT_DATA=data, DATABASE_URL="", PEAKCUT_ACCOUNTS="0")
+    from studio import auth, brain, creators, ctx, db, jobs, render, roman, server
+
+    db.init()
+    try:
+        user = auth.local_user().id
+        source = {"type": "file", "name": "Caption test"}
+        clip = {"id": "clip1", "start": 0.0, "end": 4.0, "status": "done", "hook": "KEEP THE HOOK",
+                "title": "A clip", "description": "", "hashtags": [], "score": 95}
+
+        with ctx.as_user(user):
+            creator = creators.create({"name": "Caption test creator", "captions": False})
+            inherited = jobs.create(source, {}, enqueue=False, creator=creator["id"])
+            live_job = jobs.create(source, {}, enqueue=False, creator=creator["id"], kind="live")
+            override = jobs.create(source, {"captions": True}, enqueue=False, creator=creator["id"])
+            check("videos and live jobs inherit the creator's caption preference",
+                  inherited["options"]["captions"] is False and live_job["options"]["captions"] is False)
+            check("a job can override its creator's caption preference", override["options"]["captions"] is True)
+
+            job = jobs.create(source, {}, enqueue=False)
+            check("the default is to show captions", job["options"]["captions"] is True)
+            job["options"].pop("captions")
+            job.update(status="done", source_path=str(Path(data) / "source.mp4"), width=1920, height=1080,
+                       duration=4.0, clips=[clip])
+            jobs.save(job)
+            (Path(data) / "source.mp4").write_bytes(b"x")     # the whole video is still kept, so the clip can be made again
+
+        with (ctx.as_user(user), patch.object(render, "_render_in", return_value={"file": "clip1.mp4"}) as encode,
+              patch.object(brain, "english_captions", return_value=FIXED) as prepare,
+              patch.object(roman, "words", wraps=roman.words) as romanize,
+              patch.object(jobs._q, "put") as queue):
+            jobs.render_one(job, clip, WORDS)
+            ass = next(x for x in encode.call_args.args if isinstance(x, str) and "[Events]" in x)
+            check("an older saved clip still renders spoken captions",
+                  clip["status"] == "done" and has_dialogue(ass, "Cap", "POLISHED"))
+            check("caption preparation is cached for the clip", prepare.call_count == 1 and clip["fixed_words"] == FIXED)
+
+            for value in ("false", 0, None):
+                check(f"the clip editor and creator settings reject {value!r} as a caption preference",
+                      rejects_caption_value(lambda: server.rerender(job["id"], clip["id"], {"captions": value}))
+                      and rejects_caption_value(lambda: server.new_creator({"name": "Invalid", "captions": value})))
+            check("invalid caption changes do not queue a render", not queue.called)
+
+            prepare.reset_mock()
+            romanize.reset_mock()
+            response = server.rerender(job["id"], clip["id"], {"captions": False})
+            check("the clip editor can turn captions off", response["clips"][0]["captions"] is False)
+            check("turning captions off queues the clip for rendering", queue.call_args.args[0] == ("clip", job["id"], clip["id"]))
+            jobs.render_one(job, clip, WORDS)
+            ass = next(x for x in encode.call_args.args if isinstance(x, str) and "[Events]" in x)
+            check("turning off captions keeps the hook and skips caption processing",
+                  clip["status"] == "done" and not has_dialogue(ass, "Cap") and has_dialogue(ass, "Hook", "KEEP THE HOOK")
+                  and not prepare.called and not romanize.called)
+            saved = json.loads((Path(job["dir"]) / "job.json").read_text(encoding="utf-8"))["clips"][0]
+            check("the saved clip retains both the preference and the cached words",
+                  saved["captions"] is False and saved["fixed_words"] == FIXED)
+
+            response = server.rerender(job["id"], clip["id"], {"captions": True})
+            check("the clip editor can turn captions back on", response["clips"][0]["captions"] is True)
+            jobs.render_one(job, clip, WORDS)
+            check("turning captions back on uses the cached words",
+                  clip["status"] == "done" and has_dialogue(next(x for x in encode.call_args.args if isinstance(x, str) and "[Events]" in x), "Cap", "POLISHED")
+                  and not prepare.called)
+
+            render.render_clip(Path(data) / "source.mp4", Path(data) / "clips", "direct",
+                               dict(clip, captions=False), WORDS, 1920, 1080)
+            ass = next(x for x in encode.call_args.args if isinstance(x, str) and "[Events]" in x)
+            check("the renderer honors captions off even when it receives spoken words",
+                  not has_dialogue(ass, "Cap") and has_dialogue(ass, "Hook", "KEEP THE HOOK"))
+    finally:
+        db.engine.dispose()
+
+
+if __name__ == "__main__":
+    with tempfile.TemporaryDirectory(prefix="pc-captions-") as data:
+        main(data)
