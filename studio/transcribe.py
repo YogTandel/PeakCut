@@ -13,7 +13,9 @@ import time
 
 import numpy as np
 
-from . import fetch_model
+import httpx
+
+from . import config, fetch_model
 
 _lock = threading.Lock()
 
@@ -78,8 +80,93 @@ _remote_down_until = 0.0
 _remote_lacks: dict = {}       # language -> until when: the card's machine has no model for it, so it is done here
 
 
+# ElevenLabs' Scribe, when a key is set (PEAKCUT_ELEVENLABS_KEY): it writes the transcript and the local model is
+# only the fallback. The audio leaves this machine and ElevenLabs bills for each minute, so it is off by default.
+CLOUD = bool(config.ELEVENLABS_KEY)
+CLOUD_MODEL = config.ELEVENLABS_MODEL
+CLOUD_WORKERS = config.ELEVENLABS_WORKERS
+CLOUD_URL = "https://api.elevenlabs.io/v1/speech-to-text"
+
+
 def model_ready(lang: str = fetch_model.DEFAULT) -> bool:
-    return fetch_model.ready(lang)
+    return CLOUD or fetch_model.ready(lang)
+
+
+def _cloud_piece(seg: np.ndarray, lang: str, at: int) -> list:
+    """One stretch of sound written down by ElevenLabs, as [{'w','s','e'}] on the whole video's clock. The audio goes
+    as raw 16-bit little-endian mono at 16 kHz, which is what it already is, so nothing is encoded on the way."""
+    pcm = np.clip(seg * 32768.0, -32768, 32767).astype("<i2").tobytes()
+    form = {"model_id": CLOUD_MODEL, "timestamps_granularity": "word", "file_format": "pcm_s16le_16"}
+    if fetch_model.known(lang):
+        form["language_code"] = lang.split("-")[0]
+    last = None
+    for attempt in (1, 2):
+        r = httpx.post(CLOUD_URL, data=form, files={"file": ("piece.pcm", pcm, "application/octet-stream")},
+                       headers={"xi-api-key": config.ELEVENLABS_KEY},
+                       timeout=httpx.Timeout(240, connect=15))
+        if r.status_code in (429, 500, 502, 503, 504) and attempt == 1:
+            time.sleep(2)
+            continue
+        last = r
+        break
+    if last.status_code != 200:
+        detail = ""
+        try:
+            body = last.json()
+            detail = str((body.get("detail") or {}).get("message") or body.get("detail") or "")[:160] if isinstance(body, dict) else ""
+        except ValueError:
+            detail = (last.text or "")[:160]
+        raise RuntimeError(f"ElevenLabs answered HTTP {last.status_code}{': ' + detail if detail else ''}")
+    body = last.json()
+    off = at / 16000.0
+    out = []
+    for w in body.get("words") or []:
+        if w.get("type") != "word":              # spaces and sounds like (laughter) are not words to time
+            continue
+        text = str(w.get("text") or "").strip()
+        if not text or w.get("start") is None or w.get("end") is None:
+            continue
+        out.append({"w": text, "s": round(float(w["start"]) + off, 2), "e": round(float(w["end"]) + off, 2)})
+    return out
+
+
+def _settle(words: list) -> list:
+    """The words in order, without the same one twice at the same moment; each lasts until the next one starts,
+    capped so pauses stay pauses."""
+    out = []
+    for w in words:
+        if out and out[-1]["w"] == w["w"] and out[-1]["s"] == w["s"]:
+            continue
+        out.append(w)
+    for i, w in enumerate(out):
+        nxt = out[i + 1]["s"] if i + 1 < len(out) else w["e"] + 0.4
+        w["e"] = round(max(w["s"] + 0.08, min(nxt, max(w["e"], w["s"] + 0.6))), 2)
+    return out
+
+
+def _cloud_all(todo: list, on_progress, lang: str) -> list:
+    """Every stretch in turn, several at once. Words come back in order, timed on the whole video."""
+    if not todo:
+        return []
+    done = [0]
+    lock = threading.Lock()
+
+    def one(item):
+        a, b, seg = item
+        got = _cloud_piece(seg, lang, a)
+        with lock:
+            done[0] += 1
+            if on_progress:
+                on_progress(done[0] / len(todo))
+        return got
+
+    if CLOUD_WORKERS > 1 and len(todo) > 1:
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(min(CLOUD_WORKERS, len(todo)), thread_name_prefix="scribe") as ex:
+            results = list(ex.map(one, todo))
+    else:
+        results = [one(item) for item in todo]
+    return _settle([w for got in results for w in got])
 
 
 def _model_files(d) -> dict:
@@ -332,6 +419,14 @@ def transcribe(audio: np.ndarray, on_progress=None, lang: str = fetch_model.DEFA
         if len(seg) < 4800 or float(np.sqrt((seg ** 2).mean())) < 0.003:
             continue  # silence: skip, saves time and avoids made-up words
         todo.append((a, b, seg))
+    if CLOUD:
+        try:
+            return _cloud_all(todo, on_progress, lang)
+        except Exception as e:  # noqa: BLE001 - the local model, or the card's machine, still writes it down
+            if not REMOTE and not fetch_model.ready(lang):
+                raise RuntimeError(f"ElevenLabs couldn't write down this video ({e}). Check the key and the account, "
+                                   "or add the language's speech model in Settings → Speech models.") from e
+            print(f"ElevenLabs was not used this time ({e}); transcribing here instead.", flush=True)
     remote = _remote_ok(lang)
     size = max(1, REMOTE_BATCH if remote else BATCH)
     groups = [todo[i:i + size] for i in range(0, len(todo), size)]
@@ -383,14 +478,4 @@ def transcribe(audio: np.ndarray, on_progress=None, lang: str = fetch_model.DEFA
             results = list(ex.map(decode, groups))
     else:
         results = [decode(g) for g in groups]
-    for out in results:
-        for piece in out:
-            for w in piece:
-                if words and words[-1]["w"] == w["w"] and words[-1]["s"] == w["s"]:
-                    continue  # the model sometimes says the same word twice at the same moment
-                words.append(w)
-    # A word lasts until the next one starts, capped so pauses stay pauses.
-    for i, w in enumerate(words):
-        nxt = words[i + 1]["s"] if i + 1 < len(words) else w["e"] + 0.4
-        w["e"] = round(max(w["s"] + 0.08, min(nxt, max(w["e"], w["s"] + 0.6))), 2)
-    return words
+    return _settle([w for out in results for piece in out for w in piece])

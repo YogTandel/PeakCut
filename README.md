@@ -144,6 +144,20 @@ offers to download it. Set a creator's language on their Setup page so their liv
 It understands Modern Standard Arabic and everyday dialects, and the AI turns English words said in between
 back into English. Captions on the clips are in English.
 
+### Speech in the cloud (optional)
+
+The transcript is written on this machine by default (see the speech models above). If you would rather use
+ElevenLabs' Scribe, set a key and it does the listening instead; the local model is then only the fallback:
+
+```ini
+PEAKCUT_ELEVENLABS_KEY=your-key-here
+# PEAKCUT_ELEVENLABS_MODEL=scribe_v2      # whatever the speech-to-text page lists
+```
+
+The sound of each video is sent to ElevenLabs and is billed by them per minute; nothing is sent when no key is set.
+Each 12–24 second stretch is sent with word timestamps, and if ElevenLabs cannot answer the local model writes that
+video instead. Settings → Speech models shows which one is doing the work.
+
 ## Settings
 
 Everything is set through environment variables, normally in a `.env` file next to this README.

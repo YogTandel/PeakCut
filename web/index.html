@@ -6024,8 +6024,10 @@ async function drawSettings() {
     }
     if (tab === "speech") {
       const r = await api("/api/speech");
-      body.innerHTML = `<section class="set-sec"><h2>Speech models</h2><p class="help">PeakCut writes down what is said in a video with a speech model that runs on this computer, one per language. English is always here. Add another language to clip videos spoken in it, then choose that language when adding a video, or on a creator's Setup.</p>
-        <div class="speech-list">${r.models.map(m => `<div class="speech-row"><div class="speech-info"><b>${esc(langName(m.lang))}</b><span class="sub">${esc(m.size_mb)} MB · ${esc(m.credit)}</span>
+      const cloud = r.cloud?.on ? `<div class="speech-row"><div class="speech-info"><b>ElevenLabs Scribe (cloud)</b><span class="sub">${esc(r.cloud.model)} writes the transcript now; the models below are only the fallback. ElevenLabs bills each minute of sound, and the sound leaves this computer.</span></div>
+          <div class="row"><span class="pill ok">${ic("check")}In use</span></div></div>` : "";
+      body.innerHTML = `<section class="set-sec"><h2>Speech models</h2><p class="help">PeakCut writes down what is said in a video with a speech model that runs on this computer, one per language. English is always here. Add another language to clip videos spoken in it, then choose that language when adding a video, or on a creator's Setup.${r.cloud?.on ? "" : " To have ElevenLabs' Scribe do it instead, set PEAKCUT_ELEVENLABS_KEY: the sound then leaves this computer and ElevenLabs bills each minute."}</p>
+        <div class="speech-list">${cloud}${r.models.map(m => `<div class="speech-row"><div class="speech-info"><b>${esc(langName(m.lang))}</b><span class="sub">${esc(m.size_mb)} MB · ${esc(m.credit)}</span>
             ${m.state === "downloading" ? `<div class="bar"><i style="width:${m.percent}%"></i></div>` : ""}${m.error && m.state === "missing" ? `<span class="sub" style="color:var(--bad)">The last download failed. Check the internet connection and try again.</span>` : ""}</div>
           <div class="row">${m.state === "ready" ? `<span class="pill ok">${ic("check")}Ready</span>${m.default ? "" : `<button class="btn sm ghost" data-act="speechdel" data-v="${esc(m.lang)}">${ic("trash")}Remove</button>`}`
             : m.state === "downloading" ? `<span class="pill">Downloading ${esc(m.percent)}%</span>`
